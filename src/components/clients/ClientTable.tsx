@@ -1,8 +1,9 @@
 import React from 'react';
 import { Client } from '../../types';
-import { Pencil, Trash2, Briefcase, MapPin, Mail, Phone } from 'lucide-react';
+import { Pencil, Trash2, Briefcase, MapPin, Mail, Phone, MessageSquare } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { getWhatsAppLink } from '../../utils/whatsapp';
 
 interface ClientTableProps {
     clients: Client[];
@@ -74,6 +75,16 @@ export const ClientTable: React.FC<ClientTableProps> = ({
                             </td>
                             <td className="sticky right-0 bg-background/95 backdrop-blur-sm px-4 md:px-8 py-5 text-right border-l border-white/5">
                                 <div className="flex items-center justify-end gap-2">
+                                    <a
+                                        href={getWhatsAppLink(client.phone || '')}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="p-2 rounded-lg hover:text-green-500 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 transition-all"
+                                        title="Chamar no WhatsApp"
+                                    >
+                                        <MessageSquare size={16} />
+                                    </a>
                                     <Button
                                         variant="ghost"
                                         onClick={(e) => { e.stopPropagation(); onEdit(client); }}

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Client, Deal, Event } from '../../types';
 import { formatDate, formatCurrency } from '../../utils';
-import { X, User as UserIcon, Mail, Phone, Target, Home, History, Clock } from 'lucide-react';
+import { X, User as UserIcon, Mail, Phone, Target, Home, History, Clock, MessageSquare } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { getWhatsAppLink } from '../../utils/whatsapp';
 
 interface ClientDetailsSliderProps {
     client: Client | null;
@@ -37,7 +38,20 @@ export const ClientDetailsSlider: React.FC<ClientDetailsSliderProps> = ({
                             <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase italic">{client.name}</h2>
                             <div className="flex items-center gap-4 mt-2">
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold"><Mail size={12} className="text-primary" /> {client.email || 'Sem email'}</div>
-                                <div className="flex items-center gap-1.5 text-xs text-foreground font-bold"><Phone size={12} className="text-primary" /> {client.phone || 'Sem telefone'}</div>
+                                <div className="flex items-center gap-1.5 text-xs text-foreground font-bold">
+                                    <Phone size={12} className="text-primary" /> {client.phone || 'Sem telefone'}
+                                    {client.phone && (
+                                        <a
+                                            href={getWhatsAppLink(client.phone)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="ml-2 p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 transition-all animate-pulse hover:animate-none"
+                                            title="Enviar WhatsApp"
+                                        >
+                                            <MessageSquare size={12} />
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

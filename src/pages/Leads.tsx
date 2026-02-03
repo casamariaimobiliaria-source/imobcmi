@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Users, Plus, Search, Filter, LayoutGrid, List as ListIcon,
-    Flame, Thermometer, Snowflake, Clock, MoreVertical,
-    Phone, Mail, MessageSquare, ChevronRight, Edit, Trash2,
-    Calendar, Building2, MapPin, User as UserIcon, Sparkles
+    Search, Plus, Filter, Users, Calendar,
+    MoreHorizontal, Edit, Trash2, Mail, Phone,
+    MessageSquare, Sparkles, LayoutGrid, List as ListIcon,
+    AlertCircle, CheckCircle2, Clock, Flame, Snowflake, Thermometer,
+    ExternalLink
 } from 'lucide-react';
+import { getWhatsAppLink } from '../utils/whatsapp';
 import { useApp } from '../context/AppProvider';
 import { Lead } from '../types';
 import { aiService, AIInsight } from '../services/aiService';
@@ -298,6 +300,15 @@ export const Leads = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <a
+                                                    href={getWhatsAppLink(lead.telefone || '')}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-all border border-transparent hover:border-green-500/20"
+                                                    title="Abrir WhatsApp"
+                                                >
+                                                    <MessageSquare size={16} />
+                                                </a>
                                                 <button
                                                     onClick={() => handleGetAIInsights(lead)}
                                                     disabled={isAnalyzing}
@@ -358,6 +369,16 @@ export const Leads = () => {
                                         <div className="pt-3 border-t border-white/5 flex items-center justify-between">
                                             <span className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">{lead.midia || 'Direto'}</span>
                                             <div className="flex items-center gap-1">
+                                                <a
+                                                    href={getWhatsAppLink(lead.telefone || '')}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="p-1.5 rounded-lg text-green-500 hover:bg-green-500/10 transition-all border border-transparent hover:border-green-500/20"
+                                                    title="WhatsApp"
+                                                >
+                                                    <MessageSquare size={14} />
+                                                </a>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleGetAIInsights(lead); }}
                                                     disabled={isAnalyzing}
