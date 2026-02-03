@@ -14,7 +14,6 @@ import { Link } from 'react-router-dom';
 import { aiService } from '../services/aiService';
 import { toast } from 'sonner';
 import { Sparkles, BrainCircuit, Activity, Zap, TrendingDown as TrendingDownIcon, Plus } from 'lucide-react';
-import { populateDatabase } from '../utils/seedData';
 
 const COLORS = ['#22d3ee', '#818cf8', '#10b981', '#f59e0b', '#f43f5e', '#a855f7', '#ec4899'];
 const getDynamicPrimary = () => getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#22d3ee';
@@ -28,13 +27,6 @@ export const Dashboard = () => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [financeAnalysis, setFinanceAnalysis] = useState<any>(null);
 
-    const handlePopulate = () => {
-        if (user) {
-            populateDatabase(user.id, user.organizationId);
-        } else {
-            toast.error("Usuário não logado");
-        }
-    };
 
     const filteredSales = useMemo(() => {
         return sales.filter(s => {
@@ -352,12 +344,6 @@ export const Dashboard = () => {
                     </div>
 
                     <div className="flex gap-4">
-                        <button
-                            onClick={handlePopulate}
-                            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all cursor-pointer"
-                        >
-                            <Plus size={16} /> Dados Demo
-                        </button>
                         <button
                             onClick={handleAIFinancialAnalysis}
                             disabled={isAnalyzing}
