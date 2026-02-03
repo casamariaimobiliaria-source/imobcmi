@@ -59,7 +59,8 @@ export const Leads = () => {
         corretor: '',
         temperatura: 'warm',
         status: 'novo',
-        historico: ''
+        historico: '',
+        proximo_contato: ''
     });
 
     const filteredLeads = leads.filter(lead => {
@@ -90,7 +91,8 @@ export const Leads = () => {
                 corretor: '',
                 temperatura: 'warm',
                 status: 'novo',
-                historico: ''
+                historico: '',
+                proximo_contato: ''
             });
         }
         setIsModalOpen(true);
@@ -108,7 +110,8 @@ export const Leads = () => {
             }
             setIsModalOpen(false);
         } catch (err) {
-            toast.error('Erro ao salvar lead');
+            console.error('Erro detalhado ao salvar lead:', err);
+            toast.error('Erro ao salvar lead. Verifique o console para mais detalhes.');
         }
     };
 
@@ -457,8 +460,8 @@ export const Leads = () => {
                                     <input
                                         type="date"
                                         className="premium-input w-full"
-                                        value={formData.data_compra || ''} // Usando data_compra como placeholder para próxima data
-                                        onChange={(e) => setFormData({ ...formData, data_compra: e.target.value })}
+                                        value={formData.proximo_contato || ''}
+                                        onChange={(e) => setFormData({ ...formData, proximo_contato: e.target.value })}
                                     />
                                 </div>
                             </div>

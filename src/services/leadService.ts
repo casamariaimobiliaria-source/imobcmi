@@ -57,9 +57,14 @@ export const leadService = {
             organization_id: lead.organizationId
         });
 
+        const savedData = data as any;
         return {
-            ...data,
-            organizationId: data.organization_id
+            ...savedData,
+            nome: savedData.name,
+            telefone: savedData.phone,
+            midia: savedData.source,
+            proximo_contato: savedData.next_contact,
+            organizationId: savedData.organization_id
         };
     },
 
