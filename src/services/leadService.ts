@@ -18,11 +18,11 @@ export const leadService = {
 
         return (data || []).map((l: any) => ({
             ...l,
-            nome: l.name,
-            telefone: l.phone,
-            midia: l.source,
-            proximo_contato: l.next_contact,
-            organizationId: l.organization_id
+            nome: l.name || '',
+            telefone: l.phone || '',
+            midia: l.source || '',
+            proximo_contato: l.next_contact || '',
+            organizationId: l.organization_id || ''
         }));
     },
 

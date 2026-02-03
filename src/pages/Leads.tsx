@@ -63,9 +63,14 @@ export const Leads = () => {
     });
 
     const filteredLeads = leads.filter(lead => {
-        const matchesSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.telefone?.includes(searchTerm);
+        if (!lead) return false;
+        const nome = lead.nome || '';
+        const email = lead.email || '';
+        const telefone = lead.telefone || '';
+
+        const matchesSearch = nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            telefone.includes(searchTerm);
         const matchesTemp = tempFilter ? lead.temperatura === tempFilter : true;
         return matchesSearch && matchesTemp;
     });
@@ -255,10 +260,10 @@ export const Leads = () => {
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary font-black italic border border-white/5">
-                                                    {lead.nome.charAt(0)}
+                                                    {(lead.nome || '?').charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors uppercase italic">{lead.nome}</p>
+                                                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors uppercase italic">{lead.nome || 'Sem Nome'}</p>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium"><Phone size={10} /> {lead.telefone || '--'}</span>
                                                         <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium"><Mail size={10} /> {lead.email || '--'}</span>
