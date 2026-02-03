@@ -34,14 +34,14 @@ export const leadService = {
                 phone: lead.telefone,
                 email: lead.email,
                 source: lead.midia,
-                data_compra: lead.data_compra,
+                data_compra: lead.data_compra || null,
                 corretor: lead.corretor,
                 empreendimento: lead.empreendimento,
                 temperatura: lead.temperatura,
                 status: lead.status || 'novo',
                 historico: lead.historico,
                 user_id: lead.user_id,
-                next_contact: lead.proximo_contato,
+                next_contact: lead.proximo_contato || null,
                 organization_id: lead.organizationId
             }] as any[])
             .select()
@@ -74,7 +74,8 @@ export const leadService = {
             name: lead.nome,
             phone: lead.telefone,
             source: lead.midia,
-            next_contact: lead.proximo_contato,
+            next_contact: lead.proximo_contato || null,
+            data_compra: lead.data_compra || null,
             organization_id: lead.organizationId
         };
 
