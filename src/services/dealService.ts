@@ -22,11 +22,11 @@ export const dealService = {
             title: d.title,
             value: Number(d.value),
             stage: d.stage as any,
-            client_id: d.client_id ?? undefined,
-            agent_id: d.agent_id ?? undefined,
+            client_id: d.client_id,
+            agent_id: d.agent_id,
             created_at: d.created_at,
             updated_at: d.updated_at,
-            organizationId: d.organization_id ?? undefined
+            organizationId: d.organization_id
         }));
     },
 
@@ -34,12 +34,12 @@ export const dealService = {
         const { data, error } = await supabase
             .from('deals')
             .insert([{
-                title: deal.title ?? 'Novo Negócio',
-                value: deal.value ?? 0,
-                stage: deal.stage ?? 'lead',
-                client_id: deal.client_id ?? null,
-                agent_id: deal.agent_id ?? null,
-                organization_id: deal.organizationId ?? null
+                title: deal.title,
+                value: deal.value,
+                stage: deal.stage || 'lead',
+                client_id: deal.client_id,
+                agent_id: deal.agent_id,
+                organization_id: deal.organizationId
             }])
             .select()
             .single();
@@ -59,11 +59,11 @@ export const dealService = {
             title: data.title,
             value: Number(data.value),
             stage: data.stage as any,
-            client_id: data.client_id ?? undefined,
-            agent_id: data.agent_id ?? undefined,
+            client_id: data.client_id,
+            agent_id: data.agent_id,
             created_at: data.created_at,
             updated_at: data.updated_at,
-            organizationId: data.organization_id ?? undefined
+            organizationId: data.organization_id
         };
     },
 

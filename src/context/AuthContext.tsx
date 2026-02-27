@@ -49,33 +49,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const handleUserSession = async (authUser: any) => {
-        const { data: userProfile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .ilike('email', authUser.email)
-            .single();
-
-        if (profileError) {
-            console.warn('⚠️ Não foi possível carregar perfil da tabela users:', profileError.message, '| Código:', profileError.code);
-        }
-
+        const { data: userProfile } = await supabase.from('users').select('*').eq('email', authUser.email).single();
         if (userProfile) {
-            const isAdmin = userProfile.role === 'admin' || userProfile.is_super_admin === true;
-            console.log(`✅ Perfil carregado: ${userProfile.name} | role: ${userProfile.role} | is_super_admin: ${userProfile.is_super_admin} | → ${isAdmin ? 'ADMIN' : 'AGENT'}`);
             setUser({
                 id: userProfile.id,
                 name: userProfile.name,
                 email: userProfile.email,
-                role: (isAdmin ? 'admin' : 'agent') as UserRole,
+                role: userProfile.role as UserRole,
                 organizationId: userProfile.organization_id,
                 phone: (userProfile as any).phone
             });
             if (userProfile.organization_id) loadSettings(userProfile.organization_id);
         } else {
-            console.warn('⚠️ Perfil não encontrado na tabela users para:', authUser.email, '— atribuindo role: agent');
             setUser({
                 id: authUser.id,
-                name: authUser.user_metadata?.name || authUser.email,
+                name: authUser.user_metadata?.name || 'Visitante',
                 email: authUser.email,
                 role: 'agent'
             });

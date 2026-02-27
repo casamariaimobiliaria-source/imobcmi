@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import {
   AppContextType, UserRole
 } from '../types';
-import { supabase, supabaseFinan } from '../supabaseClient';
+import { supabase } from '../supabaseClient';
 import { salesService } from '../services/salesService';
 import { agentService } from '../services/agentService';
 import { clientService } from '../services/clientService';
@@ -162,16 +162,9 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
         fetchData();
         if (p.eventType === 'INSERT') toast.info('Novo lead recebido!');
       })
-      .subscribe();
-
-    const channelFinan = supabaseFinan.channel('app-changes-finan')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_records' }, () => fetchData())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-      supabaseFinan.removeChannel(channelFinan);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const addUser = async (u: any) => {
