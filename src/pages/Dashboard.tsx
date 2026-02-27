@@ -251,37 +251,40 @@ export const Dashboard = () => {
         }
     };
 
+    const agentSalesByDeveloper = useMemo(() => {
+        if (user?.role !== 'agent') return [];
+        const mySales = sales.filter(s => s.agentId === user.id && s.status === 'approved');
+        const map = new Map();
+        mySales.forEach(s => {
+            const devName = developers.find(d => d.id === s.developerId)?.companyName || 'Outras';
+            map.set(devName, (map.get(devName) || 0) + s.unitValue);
+        });
+        return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5);
+    }, [user, sales, developers]);
+
+    const agentSalesBySource = useMemo(() => {
+        if (user?.role !== 'agent') return [];
+        const mySales = sales.filter(s => s.agentId === user.id && s.status === 'approved');
+        const map = new Map();
+        mySales.forEach(s => {
+            const source = s.leadSource || 'Indicação';
+            map.set(source, (map.get(source) || 0) + s.unitValue);
+        });
+        return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+    }, [user, sales]);
+
+    const agentSalesByStatus = useMemo(() => {
+        if (user?.role !== 'agent') return [];
+        const allSales = sales.filter(s => s.agentId === user?.id);
+        return [
+            { name: 'Aprovada', value: allSales.filter(s => s.status === 'approved').reduce((acc, s) => acc + s.unitValue, 0) },
+            { name: 'Pendente', value: allSales.filter(s => s.status === 'pending').reduce((acc, s) => acc + s.unitValue, 0) },
+            { name: 'Cancelada', value: allSales.filter(s => s.status === 'rejected').reduce((acc, s) => acc + s.unitValue, 0) }
+        ];
+    }, [user, sales]);
+
     const agentChartData = useMemo(() => {
         if (user?.role !== 'agent') return null;
-
-        const mySales = sales.filter(s => s.agentId === user.id && s.status === 'approved');
-
-        const byDeveloper = useMemo(() => {
-            const map = new Map();
-            mySales.forEach(s => {
-                const devName = developers.find(d => d.id === s.developerId)?.companyName || 'Outras';
-                map.set(devName, (map.get(devName) || 0) + s.unitValue);
-            });
-            return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5);
-        }, [mySales, developers]);
-
-        const bySource = useMemo(() => {
-            const map = new Map();
-            mySales.forEach(s => {
-                const source = s.leadSource || 'Indicação';
-                map.set(source, (map.get(source) || 0) + s.unitValue);
-            });
-            return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-        }, [mySales]);
-
-        const byStatus = useMemo(() => {
-            const allSales = sales.filter(s => s.agentId === user.id);
-            return [
-                { name: 'Aprovada', value: allSales.filter(s => s.status === 'approved').reduce((acc, s) => acc + s.unitValue, 0) },
-                { name: 'Pendente', value: allSales.filter(s => s.status === 'pending').reduce((acc, s) => acc + s.unitValue, 0) },
-                { name: 'Cancelada', value: allSales.filter(s => s.status === 'rejected').reduce((acc, s) => acc + s.unitValue, 0) }
-            ];
-        }, [sales, user]);
 
         const commissionHistory = chartData.map(d => ({
             name: d.name,
@@ -295,8 +298,8 @@ export const Dashboard = () => {
             ).reduce((acc, p) => acc + p.amount, 0)
         }));
 
-        return { byDeveloper, bySource, byStatus, commissionHistory };
-    }, [user, sales, developers, financialRecords, chartData, selectedMonth]);
+        return { byDeveloper: agentSalesByDeveloper, bySource: agentSalesBySource, byStatus: agentSalesByStatus, commissionHistory };
+    }, [user, agentSalesByDeveloper, agentSalesBySource, agentSalesByStatus, financialRecords, chartData, selectedMonth]);
 
     const upcomingEvents = useMemo(() => {
         const now = new Date();

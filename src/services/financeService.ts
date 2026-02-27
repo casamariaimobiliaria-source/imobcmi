@@ -1,10 +1,10 @@
-import { supabase } from '../supabaseClient';
+import { supabaseFinan } from '../supabaseClient';
 import { FinancialRecord, Category } from '../types';
 import { auditService } from './auditService';
 
 export const financeService = {
     async getFinancialRecords(organizationId?: string): Promise<FinancialRecord[]> {
-        let query = supabase.from('financial_records').select('*');
+        let query = supabaseFinan.from('financial_records').select('*');
         if (organizationId) {
             query = query.eq('organization_id', organizationId);
         }
@@ -26,7 +26,7 @@ export const financeService = {
     },
 
     async addFinancialRecord(record: FinancialRecord): Promise<FinancialRecord> {
-        const { data, error } = await supabase.from('financial_records').insert([{
+        const { data, error } = await supabaseFinan.from('financial_records').insert([{
             description: record.description,
             type: record.type,
             amount: record.amount,
@@ -62,7 +62,7 @@ export const financeService = {
         if (data.category) updateData.category_id = data.category;
         if (data.relatedEntityId !== undefined) updateData.related_entity_id = data.relatedEntityId || null;
 
-        const { error } = await supabase.from('financial_records').update(updateData).eq('id', id);
+        const { error } = await supabaseFinan.from('financial_records').update(updateData).eq('id', id);
         if (error) throw error;
 
         await auditService.logAction({
@@ -74,7 +74,7 @@ export const financeService = {
     },
 
     async deleteFinancialRecord(id: string): Promise<void> {
-        const { error } = await supabase.from('financial_records').delete().eq('id', id);
+        const { error } = await supabaseFinan.from('financial_records').delete().eq('id', id);
         if (error) throw error;
 
         await auditService.logAction({
@@ -85,7 +85,7 @@ export const financeService = {
     },
 
     async getCategories(organizationId?: string): Promise<Category[]> {
-        let query = supabase.from('categories').select('*');
+        let query = supabaseFinan.from('categories').select('*');
         if (organizationId) {
             query = query.eq('organization_id', organizationId);
         }
@@ -100,7 +100,7 @@ export const financeService = {
     },
 
     async addCategory(category: Category): Promise<Category> {
-        const { data, error } = await supabase.from('categories').insert([{
+        const { data, error } = await supabaseFinan.from('categories').insert([{
             name: category.name,
             type: category.type,
             organization_id: category.organizationId

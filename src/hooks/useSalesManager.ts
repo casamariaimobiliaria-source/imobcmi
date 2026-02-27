@@ -70,10 +70,8 @@ export const useSalesManager = () => {
         if (editingId) {
             updateSale(editingId, formData);
         } else {
-            addSale({
-                id: generateId(),
-                ...formData as Sale
-            });
+            const { id: _ignored, ...rest } = formData as Sale;
+            addSale({ id: generateId(), ...rest });
         }
 
         setFormData(initialFormState);
