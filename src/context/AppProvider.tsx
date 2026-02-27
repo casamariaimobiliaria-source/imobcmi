@@ -197,6 +197,12 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteUser = async (id: string) => {
+    // Delete from organization_members first to avoid FK constraint violation
+    const { error: orgMemberError } = await supabase.from('organization_members' as any).delete().eq('user_id', id);
+    if (orgMemberError) {
+      console.warn('Could not delete organization_members, might not exist or need permission:', orgMemberError);
+    }
+
     const { error } = await supabase.from('users').delete().eq('id', id);
     if (error) {
       console.error('Erro ao excluir usuário:', error);
