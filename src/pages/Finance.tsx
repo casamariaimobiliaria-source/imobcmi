@@ -6,12 +6,13 @@ import { formatCurrency, formatDate, generateId } from '../utils';
 import {
   ArrowDownCircle, ArrowUpCircle, Wallet, Search, Filter,
   Pencil, Trash2, CheckCircle2, Calendar, X, AlertCircle, Clock, CheckCircle,
-  TrendingUp, TrendingDown, Landmark, Receipt, MoreHorizontal
+  TrendingUp, TrendingDown, Landmark, Receipt, MoreHorizontal, Building
 } from 'lucide-react';
 import { Input } from '../components/ui/Input';
+import { buildCategoryTree } from '../utils/categoryUtils';
 
 export const Finance = () => {
-  const { financialRecords, agents, categories, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord } = useApp();
+  const { financialRecords, agents, categories, bankAccounts, paymentMethods, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord } = useApp();
 
   // State
   const [activeTab, setActiveTab] = useState<'overview' | 'payable' | 'receivable'>('overview');
@@ -37,12 +38,14 @@ export const Finance = () => {
     description: '',
     amount: 0,
     status: 'pending',
-    relatedEntityId: ''
+    relatedEntityId: '',
+    bankAccountId: '',
+    paymentMethodId: ''
   };
   const [formData, setFormData] = useState<Partial<FinancialRecord>>(initialFormState);
 
   // Derive categories
-  const availableCategories = categories.filter(c => c.type === formData.type);
+  const availableCategories = buildCategoryTree(categories.filter(c => c.type === formData.type));
 
   // KPIs
   const kpis = useMemo(() => {
@@ -227,7 +230,12 @@ export const Finance = () => {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <span className="bg-secondary px-3 py-1 rounded-lg text-[10px] font-black text-muted-foreground uppercase tracking-widest border border-white/10">{record.category}</span>
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="bg-secondary px-3 py-1 rounded-lg text-[10px] font-black text-muted-foreground uppercase tracking-widest border border-white/10">{record.category}</span>
+                      {record.bankAccountId && (
+                        <span className="text-[9px] font-bold text-muted-foreground mt-1 flex items-center gap-1"><Building size={10} /> {bankAccounts.find(b => b.id === record.bankAccountId)?.name || 'Banco Excluído'}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-8 py-6 text-center">
                     <div className="flex flex-col items-center gap-1">
@@ -302,10 +310,31 @@ export const Finance = () => {
                     <input type="number" step="0.01" required className="finance-input w-full font-mono text-lg" value={formData.amount || ''} onChange={e => setFormData({ ...formData, amount: parseFloat(e.target.value) })} />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 px-1">Categoria</label>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 px-1">Categoria <span className="text-red-500">*</span></label>
                     <select required className="finance-input w-full" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
                       <option value="">Selecione...</option>
-                      {availableCategories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+                      {availableCategories.map(cat => <option key={cat.id} value={cat.name}>{cat.displayName}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 px-1">Conta Bancária</label>
+                    <select className="finance-input w-full" value={formData.bankAccountId || ''} onChange={e => setFormData({ ...formData, bankAccountId: e.target.value })}>
+                      <option value="">Opcional...</option>
+                      {bankAccounts.filter(b => b.status === 'active').map(bank => (
+                        <option key={bank.id} value={bank.id}>{bank.name} - {bank.bankName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-2 px-1">Forma de Pagto.</label>
+                    <select className="finance-input w-full" value={formData.paymentMethodId || ''} onChange={e => setFormData({ ...formData, paymentMethodId: e.target.value })}>
+                      <option value="">Opcional...</option>
+                      {paymentMethods.filter(p => p.status === 'active').map(method => (
+                        <option key={method.id} value={method.id}>{method.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>

@@ -1,4 +1,3 @@
-
 export type Status = 'active' | 'inactive';
 export type SaleStatus = 'pending' | 'approved' | 'cancelled';
 export type TransactionType = 'income' | 'expense';
@@ -131,7 +130,27 @@ export interface FinancialRecord {
   dueDate: string; // Vencimento
   status: FinanceStatus;
   category: string; // Chart of Accounts
+  bankAccountId?: string;
+  paymentMethodId?: string;
   relatedEntityId?: string; // e.g. Agent ID for payments
+  organizationId?: string;
+}
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  agency: string;
+  accountNumber: string;
+  name: string;
+  initialBalance: number;
+  status: Status;
+  organizationId?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  status: Status;
   organizationId?: string;
 }
 
@@ -139,6 +158,7 @@ export interface Category {
   id: string;
   name: string;
   type: TransactionType;
+  parentId?: string | null;
   organizationId?: string;
 }
 
@@ -197,6 +217,16 @@ export interface AppContextType {
   addFinancialRecord: (record: FinancialRecord) => void;
   updateFinancialRecord: (id: string, data: Partial<FinancialRecord>) => void;
   deleteFinancialRecord: (id: string) => void;
+
+  bankAccounts: BankAccount[];
+  addBankAccount: (account: BankAccount) => void;
+  updateBankAccount: (id: string, data: Partial<BankAccount>) => void;
+  deleteBankAccount: (id: string) => void;
+
+  paymentMethods: PaymentMethod[];
+  addPaymentMethod: (method: PaymentMethod) => void;
+  updatePaymentMethod: (id: string, data: Partial<PaymentMethod>) => void;
+  deletePaymentMethod: (id: string) => void;
 
   categories: Category[];
   addCategory: (category: Category) => void;

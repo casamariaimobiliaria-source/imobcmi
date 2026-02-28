@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { FinancialRecord, Category } from '../types';
+import { FinancialRecord, Category, BankAccount, PaymentMethod } from '../types';
 import { financeService } from '../services/financeService';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
@@ -16,6 +16,18 @@ interface FinanceContextType {
     addCategory: (category: Category) => Promise<void>;
     updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
+
+    bankAccounts: BankAccount[];
+    setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
+    addBankAccount: (account: BankAccount) => Promise<void>;
+    updateBankAccount: (id: string, data: Partial<BankAccount>) => Promise<void>;
+    deleteBankAccount: (id: string) => Promise<void>;
+
+    paymentMethods: PaymentMethod[];
+    setPaymentMethods: React.Dispatch<React.SetStateAction<PaymentMethod[]>>;
+    addPaymentMethod: (method: PaymentMethod) => Promise<void>;
+    updatePaymentMethod: (id: string, data: Partial<PaymentMethod>) => Promise<void>;
+    deletePaymentMethod: (id: string) => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -25,6 +37,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const { agents, updateAgent } = useSales();
     const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
     const addFinancialRecord = async (record: FinancialRecord) => {
         let catId = record.category;
@@ -88,11 +102,43 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setCategories(prev => prev.filter(c => c.id !== id));
     };
 
+    const addBankAccount = async (account: BankAccount) => {
+        const saved = await financeService.addBankAccount({ ...account, organizationId: user?.organizationId });
+        setBankAccounts(prev => [saved, ...prev]);
+    };
+
+    const updateBankAccount = async (id: string, data: Partial<BankAccount>) => {
+        await financeService.updateBankAccount(id, data);
+        setBankAccounts(prev => prev.map(b => b.id === id ? { ...b, ...data } : b));
+    };
+
+    const deleteBankAccount = async (id: string) => {
+        await financeService.deleteBankAccount(id);
+        setBankAccounts(prev => prev.filter(b => b.id !== id));
+    };
+
+    const addPaymentMethod = async (method: PaymentMethod) => {
+        const saved = await financeService.addPaymentMethod({ ...method, organizationId: user?.organizationId });
+        setPaymentMethods(prev => [saved, ...prev]);
+    };
+
+    const updatePaymentMethod = async (id: string, data: Partial<PaymentMethod>) => {
+        await financeService.updatePaymentMethod(id, data);
+        setPaymentMethods(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    };
+
+    const deletePaymentMethod = async (id: string) => {
+        await financeService.deletePaymentMethod(id);
+        setPaymentMethods(prev => prev.filter(p => p.id !== id));
+    };
+
     return (
         <FinanceContext.Provider value={{
             financialRecords, setFinancialRecords, categories, setCategories,
             addFinancialRecord, updateFinancialRecord, deleteFinancialRecord,
-            addCategory, updateCategory, deleteCategory
+            addCategory, updateCategory, deleteCategory,
+            bankAccounts, setBankAccounts, addBankAccount, updateBankAccount, deleteBankAccount,
+            paymentMethods, setPaymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod
         }}>
             {children}
         </FinanceContext.Provider>

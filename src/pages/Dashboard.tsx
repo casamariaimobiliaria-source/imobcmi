@@ -256,34 +256,34 @@ export const Dashboard = () => {
 
         const mySales = sales.filter(s => s.agentId === user.id && s.status === 'approved');
 
-        const byDeveloper = useMemo(() => {
-            const map = new Map();
-            mySales.forEach(s => {
-                const devName = developers.find(d => d.id === s.developerId)?.companyName || 'Outras';
-                map.set(devName, (map.get(devName) || 0) + s.unitValue);
-            });
-            return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5);
-        }, [mySales, developers]);
+        // byDeveloper - computed inline (no nested hooks allowed)
+        const devMap = new Map();
+        mySales.forEach(s => {
+            const devName = developers.find(d => d.id === s.developerId)?.companyName || 'Outras';
+            devMap.set(devName, (devMap.get(devName) || 0) + s.unitValue);
+        });
+        const byDeveloper = Array.from(devMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => (b.value as number) - (a.value as number))
+            .slice(0, 5);
 
-        const bySource = useMemo(() => {
-            const map = new Map();
-            mySales.forEach(s => {
-                const source = s.leadSource || 'Indicação';
-                map.set(source, (map.get(source) || 0) + s.unitValue);
-            });
-            return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
-        }, [mySales]);
+        // bySource - computed inline
+        const srcMap = new Map();
+        mySales.forEach(s => {
+            const source = (s as any).leadSource || 'Indicação';
+            srcMap.set(source, (srcMap.get(source) || 0) + s.unitValue);
+        });
+        const bySource = Array.from(srcMap.entries()).map(([name, value]) => ({ name, value }));
 
-        const byStatus = useMemo(() => {
-            const allSales = sales.filter(s => s.agentId === user.id);
-            return [
-                { name: 'Aprovada', value: allSales.filter(s => s.status === 'approved').reduce((acc, s) => acc + s.unitValue, 0) },
-                { name: 'Pendente', value: allSales.filter(s => s.status === 'pending').reduce((acc, s) => acc + s.unitValue, 0) },
-                { name: 'Cancelada', value: allSales.filter(s => s.status === 'rejected').reduce((acc, s) => acc + s.unitValue, 0) }
-            ];
-        }, [sales, user]);
+        // byStatus - computed inline
+        const allMySales = sales.filter(s => s.agentId === user.id);
+        const byStatus = [
+            { name: 'Aprovada', value: allMySales.filter(s => s.status === 'approved').reduce((acc, s) => acc + s.unitValue, 0) },
+            { name: 'Pendente', value: allMySales.filter(s => s.status === 'pending').reduce((acc, s) => acc + s.unitValue, 0) },
+            { name: 'Cancelada', value: allMySales.filter(s => s.status === 'rejected').reduce((acc, s) => acc + s.unitValue, 0) }
+        ];
 
-        const commissionHistory = chartData.map(d => ({
+        const commissionHistory = chartData.map((d, idx) => ({
             name: d.name,
             gerado: d.comissaoCorretor,
             recebido: financialRecords.filter(r =>
@@ -291,7 +291,7 @@ export const Dashboard = () => {
                 r.category === 'Commision Payment' &&
                 r.relatedEntityId === user.id &&
                 r.status === 'paid' &&
-                (selectedMonth ? new Date(r.date).getDate().toString() === d.name : new Date(r.date).getMonth() === chartData.indexOf(d))
+                (selectedMonth ? new Date(r.date).getDate().toString() === d.name : new Date(r.date).getMonth() === idx)
             ).reduce((acc, p) => acc + p.amount, 0)
         }));
 

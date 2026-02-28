@@ -25,7 +25,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
   const { user, settings, loading: authLoading, login, logout, updateSettings } = useAuth();
   const { theme, setTheme, notifications, markNotificationAsRead, clearAllNotifications, events, setEvents, refreshEvents, setNotifications } = useUI();
   const { sales, setSales, agents, setAgents, developers, setDevelopers, clients, setClients, addSale, updateSale, deleteSale, addAgent, updateAgent, deleteAgent, addDeveloper, updateDeveloper, deleteDeveloper, addClient, updateClient, deleteClient } = useSales();
-  const { financialRecords, setFinancialRecords, categories, setCategories, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord, addCategory, updateCategory, deleteCategory } = useFinance();
+  const { financialRecords, setFinancialRecords, categories, setCategories, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord, addCategory, updateCategory, deleteCategory, bankAccounts, setBankAccounts, addBankAccount, updateBankAccount, deleteBankAccount, paymentMethods, setPaymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod } = useFinance();
   const { deals, setDeals, leads, setLeads, addDeal, updateDeal, deleteDeal, addLead, updateLead, deleteLead } = useCRM();
 
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
       const [
         agentsData, clientsData, developersData, salesData,
         financeData, categoriesData, dealsData, leadsData,
-        usersResponse, eventsResponse
+        usersResponse, eventsResponse, bankAccountsData, paymentMethodsData
       ] = await Promise.all([
         agentService.getAgents(orgId),
         clientService.getClients(orgId),
@@ -49,7 +49,9 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
         dealService.getDeals(orgId),
         leadService.getLeads(orgId),
         supabase.from('users').select('*'),
-        supabase.from('events').select('*')
+        supabase.from('events').select('*'),
+        financeService.getBankAccounts(orgId),
+        financeService.getPaymentMethods(orgId)
       ]);
 
       setAgents(agentsData);
@@ -58,6 +60,8 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
       setSales(salesData);
       setFinancialRecords(financeData);
       setCategories(categoriesData);
+      setBankAccounts(bankAccountsData);
+      setPaymentMethods(paymentMethodsData);
       setDeals(dealsData);
       setLeads(leadsData);
       if (usersResponse.data) setUsersList(usersResponse.data);
@@ -223,6 +227,8 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
       sales, addSale, updateSale, deleteSale,
       financialRecords, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord,
       categories, addCategory, updateCategory, deleteCategory,
+      bankAccounts, addBankAccount, updateBankAccount, deleteBankAccount,
+      paymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod,
       notifications, markNotificationAsRead, clearAllNotifications,
       events, refreshEvents,
       deals, addDeal, updateDeal, deleteDeal,

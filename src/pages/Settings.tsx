@@ -2,21 +2,29 @@ import React, { useState, useEffect } from 'react';
 import {
     User, Building2, Palette, Bell, Shield, Camera,
     Upload, Save, Trash2, Globe, Mail, Phone, MapPin,
-    ChevronRight, Laptop, Moon, Sun, Monitor
+    ChevronRight, Laptop, Moon, Sun, Monitor, Building, Wallet, Plus, Edit3
 } from 'lucide-react';
 import { useApp } from '../context/AppProvider';
+import { useFinance } from '../context/FinanceContext';
 import { toast } from 'sonner';
 import { supabase } from '../supabaseClient';
 
 export const Settings = () => {
     const { user, settings, theme, setTheme, agents, updateUser, updateSettings } = useApp();
-    const [activeTab, setActiveTab] = useState<'profile' | 'org' | 'preferences'>('profile');
+    const { bankAccounts, paymentMethods, addBankAccount, updateBankAccount, deleteBankAccount, addPaymentMethod, updatePaymentMethod, deletePaymentMethod } = useFinance();
+    const [activeTab, setActiveTab] = useState<'profile' | 'org' | 'preferences' | 'finance'>('profile');
     const [isUploading, setIsUploading] = useState(false);
     const [notificationPrefs, setNotificationPrefs] = useState({
         sales: true,
         leads: true,
         summary: true
     });
+
+    // Finance Tab States
+    const [isEditingBank, setIsEditingBank] = useState(false);
+    const [bankFormData, setBankFormData] = useState<Partial<any>>({});
+    const [isEditingMethod, setIsEditingMethod] = useState(false);
+    const [methodFormData, setMethodFormData] = useState<Partial<any>>({});
 
     const [profileData, setProfileData] = useState({
         name: user?.name || '',
@@ -125,6 +133,7 @@ export const Settings = () => {
     const tabs = [
         { id: 'profile', label: 'Meu Perfil', icon: User },
         { id: 'org', label: 'Organização', icon: Building2, roles: ['admin'] },
+        { id: 'finance', label: 'Bancos e Formas', icon: Wallet, roles: ['admin'] },
         { id: 'preferences', label: 'Preferências', icon: Palette },
     ].filter(t => !t.roles || t.roles.includes(user?.role || ''));
 
@@ -293,6 +302,209 @@ export const Settings = () => {
                                     <button className="px-4 py-2 bg-secondary/50 hover:bg-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-border/40">
                                         Resetar Organização
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'finance' && (
+                        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                            <div className="premium-card p-8">
+                                <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
+                                    <div>
+                                        <h3 className="text-xl font-black text-foreground italic uppercase tracking-tighter">Contas Bancárias</h3>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Gerencie os caixas da sua imobiliária</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setBankFormData({ status: 'active', initialBalance: 0 });
+                                            setIsEditingBank(true);
+                                        }}
+                                        className="premium-button py-2 px-4 shadow-lg shadow-primary/20"
+                                    >
+                                        <Plus size={16} /> Nova Conta
+                                    </button>
+                                </div>
+
+                                {isEditingBank && (
+                                    <div className="bg-secondary/30 border border-white/10 rounded-2xl p-6 mb-8 mt-4 animate-in fade-in slide-in-from-top-4">
+                                        <h4 className="text-sm font-black text-foreground uppercase tracking-widest italic mb-6">
+                                            {bankFormData.id ? 'Editar Conta' : 'Nova Conta Bancária'}
+                                        </h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="lg:col-span-2">
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Banco <span className="text-red-500">*</span></label>
+                                                <input type="text" className="premium-input w-full" placeholder="Ex: Itaú, Caixa" value={bankFormData.bankName || ''} onChange={e => setBankFormData({ ...bankFormData, bankName: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Agência</label>
+                                                <input type="text" className="premium-input w-full" placeholder="Ex: 0001" value={bankFormData.agency || ''} onChange={e => setBankFormData({ ...bankFormData, agency: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Nº Conta</label>
+                                                <input type="text" className="premium-input w-full" placeholder="Ex: 12345-6" value={bankFormData.accountNumber || ''} onChange={e => setBankFormData({ ...bankFormData, accountNumber: e.target.value })} />
+                                            </div>
+                                            <div className="lg:col-span-2">
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Apelido Conta <span className="text-red-500">*</span></label>
+                                                <input type="text" className="premium-input w-full" placeholder="Ex: Itaú Recebimentos" value={bankFormData.name || ''} onChange={e => setBankFormData({ ...bankFormData, name: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Saldo Inicial (R$)</label>
+                                                <input type="number" step="0.01" className="premium-input w-full" value={bankFormData.initialBalance || 0} onChange={e => setBankFormData({ ...bankFormData, initialBalance: parseFloat(e.target.value) || 0 })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Status</label>
+                                                <select className="premium-input w-full" value={bankFormData.status || 'active'} onChange={e => setBankFormData({ ...bankFormData, status: e.target.value as any })}>
+                                                    <option value="active">Ativo</option>
+                                                    <option value="inactive">Inativo</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/5">
+                                            <button onClick={() => setIsEditingBank(false)} className="px-4 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Cancelar</button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!bankFormData.bankName || !bankFormData.name) {
+                                                        toast.error('Preencha os campos obrigatórios.');
+                                                        return;
+                                                    }
+                                                    try {
+                                                        if (bankFormData.id) {
+                                                            await updateBankAccount(bankFormData.id, bankFormData as any);
+                                                            toast.success('Conta atualizada.');
+                                                        } else {
+                                                            await addBankAccount({ ...bankFormData, id: '' } as any);
+                                                            toast.success('Conta adicionada com sucesso.');
+                                                        }
+                                                        setIsEditingBank(false);
+                                                    } catch (e: any) {
+                                                        toast.error('Erro ao salvar conta: ' + e.message);
+                                                    }
+                                                }}
+                                                className="premium-button shadow-lg shadow-primary/20"
+                                            >
+                                                <Save size={16} /> Salvar Conta
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-3">
+                                    {bankAccounts.length === 0 && !isEditingBank && (
+                                        <div className="text-center py-10 border border-dashed border-white/10 rounded-2xl">
+                                            <Building className="mx-auto h-8 w-8 text-muted-foreground/30 mb-3" />
+                                            <p className="text-xs font-black text-muted-foreground uppercase tracking-widest italic">Nenhuma conta cadastrada</p>
+                                        </div>
+                                    )}
+                                    {bankAccounts.map(account => (
+                                        <div key={account.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-secondary/5 border border-white/5 rounded-2xl hover:bg-secondary/10 transition-colors group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-white/5 shrink-0">
+                                                    <Building size={18} className="text-primary" />
+                                                </div>
+                                                <div>
+                                                    <h5 className="text-sm font-black text-foreground italic uppercase tracking-tighter flex items-center gap-2">
+                                                        {account.name}
+                                                        {account.status === 'inactive' && <span className="text-[8px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-500">INATIVA</span>}
+                                                    </h5>
+                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                                                        {account.bankName} {account.agency && `• Ag: ${account.agency}`} {account.accountNumber && `• CC: ${account.accountNumber}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between sm:justify-end gap-6 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                                                <div className="text-right">
+                                                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1 italic">Saldo Inicial</p>
+                                                    <p className="text-sm font-black text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(account.initialBalance || 0)}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => { setBankFormData(account); setIsEditingBank(true); }} className="p-2 bg-secondary/30 text-foreground hover:bg-primary hover:text-primary-foreground rounded-lg transition-colors border border-white/5 shadow-sm opacity-0 group-hover:opacity-100">
+                                                        <Edit3 size={14} />
+                                                    </button>
+                                                    <button onClick={async () => { if (confirm('Excluir esta conta?')) { try { await deleteBankAccount(account.id); toast.success('Excluída'); } catch (e: any) { toast.error('Erro: Pode existir lançamentos associados.'); } } }} className="p-2 bg-secondary/30 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-white/5 shadow-sm opacity-0 group-hover:opacity-100">
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="premium-card p-8">
+                                <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
+                                    <div>
+                                        <h3 className="text-xl font-black text-foreground italic uppercase tracking-tighter">Formas de Pagamento</h3>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Opções disponíveis para recebimentos e pagamentos</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setMethodFormData({ status: 'active' });
+                                            setIsEditingMethod(true);
+                                        }}
+                                        className="premium-button py-2 px-4 bg-secondary text-foreground hover:bg-secondary/80 border border-white/10"
+                                    >
+                                        <Plus size={16} /> Novo Método
+                                    </button>
+                                </div>
+
+                                {isEditingMethod && (
+                                    <div className="bg-secondary/30 border border-white/10 rounded-2xl p-6 mb-8 mt-4 animate-in fade-in slide-in-from-top-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 italic">Nome do Método <span className="text-red-500">*</span></label>
+                                                <input type="text" className="premium-input w-full" placeholder="Ex: Pix, Boleto" value={methodFormData.name || ''} onChange={e => setMethodFormData({ ...methodFormData, name: e.target.value })} autoFocus onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') document.getElementById('btn-save-method')?.click();
+                                                }} />
+                                            </div>
+                                            <div className="flex justify-end gap-3 pt-4">
+                                                <button onClick={() => setIsEditingMethod(false)} className="px-4 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">Cancelar</button>
+                                                <button
+                                                    id="btn-save-method"
+                                                    onClick={async () => {
+                                                        if (!methodFormData.name) {
+                                                            toast.error('Preencha o nome.');
+                                                            return;
+                                                        }
+                                                        try {
+                                                            if (methodFormData.id) {
+                                                                await updatePaymentMethod(methodFormData.id, methodFormData as any);
+                                                                toast.success('Método atualizado.');
+                                                            } else {
+                                                                await addPaymentMethod({ ...methodFormData, id: '' } as any);
+                                                                toast.success('Método adicionado.');
+                                                            }
+                                                            setIsEditingMethod(false);
+                                                        } catch (e: any) {
+                                                            toast.error('Erro: ' + e.message);
+                                                        }
+                                                    }}
+                                                    className="premium-button shadow-lg shadow-primary/20"
+                                                >
+                                                    <Save size={16} /> Salvar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {paymentMethods.map(method => (
+                                        <div key={method.id} className="p-4 bg-secondary/5 border border-white/5 rounded-xl hover:border-primary/50 transition-all flex justify-between items-center group">
+                                            <span className="text-xs font-black text-foreground uppercase tracking-widest italic">{method.name} {method.status === 'inactive' && '(Inativo)'}</span>
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => { setMethodFormData(method); setIsEditingMethod(true); }} className="p-1.5 text-muted-foreground hover:text-primary transition-colors">
+                                                    <Edit3 size={14} />
+                                                </button>
+                                                <button onClick={async () => { if (confirm('Excluir forma de pagamento?')) { try { await deletePaymentMethod(method.id); toast.success('Excluído'); } catch (e: any) { toast.error('Em uso.'); } } }} className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors">
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {paymentMethods.length === 0 && !isEditingMethod && (
+                                        <p className="text-xs text-muted-foreground col-span-3 text-center py-4 italic">Nenhuma forma de pagamento cadastrada.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppProvider';
 import { generateId } from '../utils';
 import { TransactionType, Category } from '../types';
-import { Trash2, Plus, List, ArrowDownCircle, ArrowUpCircle, Pencil, X, Save, ShieldCheck, Sparkles } from 'lucide-react';
+import { Trash2, Plus, List, ArrowDownCircle, ArrowUpCircle, Pencil, X, Save, ShieldCheck, Sparkles, CornerDownRight } from 'lucide-react';
+import { FlattenedCategory, buildCategoryTree } from '../utils/categoryUtils';
 
 export const Categories = () => {
     const { categories, addCategory, deleteCategory, updateCategory } = useApp();
@@ -11,35 +12,39 @@ export const Categories = () => {
     // Add State
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newCategoryType, setNewCategoryType] = useState<TransactionType>('expense');
+    const [newCategoryParent, setNewCategoryParent] = useState<string>('');
 
     // Edit State
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [editName, setEditName] = useState('');
     const [editType, setEditType] = useState<TransactionType>('expense');
+    const [editParent, setEditParent] = useState<string>('');
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newCategoryName.trim()) return;
-        addCategory({ id: generateId(), name: newCategoryName, type: newCategoryType });
+        addCategory({ id: generateId(), name: newCategoryName, type: newCategoryType, parentId: newCategoryParent || null });
         setNewCategoryName('');
+        setNewCategoryParent('');
     };
 
     const openEditModal = (category: Category) => {
         setEditingCategory(category);
         setEditName(category.name);
         setEditType(category.type);
+        setEditParent(category.parentId || '');
     };
 
     const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
         if (editingCategory && editName.trim()) {
-            updateCategory(editingCategory.id, { name: editName, type: editType });
+            updateCategory(editingCategory.id, { name: editName, type: editType, parentId: editParent || null });
             setEditingCategory(null);
         }
     };
 
-    const incomeCategories = categories.filter(c => c.type === 'income');
-    const expenseCategories = categories.filter(c => c.type === 'expense');
+    const incomeCategories = buildCategoryTree(categories.filter(c => c.type === 'income'));
+    const expenseCategories = buildCategoryTree(categories.filter(c => c.type === 'expense'));
 
     return (
         <div className="space-y-10 max-w-6xl mx-auto pb-20 animate-in fade-in duration-700">
@@ -84,10 +89,26 @@ export const Categories = () => {
                         <select
                             className="category-input w-full appearance-none cursor-pointer"
                             value={newCategoryType}
-                            onChange={(e) => setNewCategoryType(e.target.value as TransactionType)}
+                            onChange={(e) => {
+                                setNewCategoryType(e.target.value as TransactionType);
+                                setNewCategoryParent(''); // reset parent if type changes
+                            }}
                         >
                             <option value="income">Receita (Entrada)</option>
                             <option value="expense">Despesa (Saída)</option>
+                        </select>
+                    </div>
+                    <div className="w-full lg:w-72 group">
+                        <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-1">Categoria Superior</label>
+                        <select
+                            className="category-input w-full appearance-none cursor-pointer"
+                            value={newCategoryParent}
+                            onChange={(e) => setNewCategoryParent(e.target.value)}
+                        >
+                            <option value="">Nenhuma (Nível Principal)</option>
+                            {(newCategoryType === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.displayName}</option>
+                            ))}
                         </select>
                     </div>
                     <button
@@ -120,14 +141,14 @@ export const Categories = () => {
                     </div>
                     <div className="divide-y divide-slate-200 dark:divide-white/[0.03] flex-1 max-h-[500px] overflow-y-auto custom-scrollbar">
                         {incomeCategories.map(cat => (
-                            <div key={cat.id} className="p-8 flex justify-between items-center hover:bg-slate-100 dark:hover:bg-white/[0.01] transition-all group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"></div>
-                                    <span className="font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors uppercase tracking-widest text-xs">{cat.name}</span>
+                            <div key={cat.id} className={`py-3 pr-5 flex justify-between items-center hover:bg-slate-100 dark:hover:bg-white/[0.01] transition-all group ${cat.level > 0 ? 'bg-slate-50/50 dark:bg-[#0f0f12]/50 border-l-2 border-emerald-500/20' : ''}`} style={{ paddingLeft: cat.level > 0 ? `${cat.level * 1.5 + 1.25}rem` : '1.25rem' }}>
+                                <div className="flex items-center gap-4">
+                                    {cat.level > 0 ? <CornerDownRight size={14} className="text-emerald-500/50 flex-shrink-0" /> : <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] flex-shrink-0"></div>}
+                                    <span className={`font-bold transition-colors uppercase tracking-widest text-[11px] group-hover:text-slate-900 dark:group-hover:text-white ${cat.level > 0 ? 'text-slate-500 dark:text-slate-400' : 'text-slate-600 dark:text-slate-300'}`}>{cat.name}</span>
                                 </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                    <button onClick={() => openEditModal(cat)} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:bg-white/5 rounded-xl border border-transparent hover:border-white/5 transition-all"><Pencil size={18} /></button>
-                                    <button onClick={() => { if (window.confirm('Remover esta categoria?')) deleteCategory(cat.id); }} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-white/5 rounded-xl border border-transparent hover:border-white/5 transition-all"><Trash2 size={18} /></button>
+                                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                    <button onClick={() => openEditModal(cat)} className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/5 transition-all"><Pencil size={14} /></button>
+                                    <button onClick={() => { if (window.confirm('Remover esta categoria?')) deleteCategory(cat.id); }} className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/5 transition-all"><Trash2 size={14} /></button>
                                 </div>
                             </div>
                         ))}
@@ -160,14 +181,14 @@ export const Categories = () => {
                     </div>
                     <div className="divide-y divide-slate-200 dark:divide-white/[0.03] flex-1 max-h-[500px] overflow-y-auto custom-scrollbar">
                         {expenseCategories.map(cat => (
-                            <div key={cat.id} className="p-8 flex justify-between items-center hover:bg-slate-100 dark:hover:bg-white/[0.01] transition-all group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)]"></div>
-                                    <span className="font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors uppercase tracking-widest text-xs">{cat.name}</span>
+                            <div key={cat.id} className={`py-3 pr-5 flex justify-between items-center hover:bg-slate-100 dark:hover:bg-white/[0.01] transition-all group ${cat.level > 0 ? 'bg-slate-50/50 dark:bg-[#0f0f12]/50 border-l-2 border-red-500/20' : ''}`} style={{ paddingLeft: cat.level > 0 ? `${cat.level * 1.5 + 1.25}rem` : '1.25rem' }}>
+                                <div className="flex items-center gap-4">
+                                    {cat.level > 0 ? <CornerDownRight size={14} className="text-red-500/50 flex-shrink-0" /> : <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.6)] flex-shrink-0"></div>}
+                                    <span className={`font-bold transition-colors uppercase tracking-widest text-[11px] group-hover:text-slate-900 dark:group-hover:text-white ${cat.level > 0 ? 'text-slate-500 dark:text-slate-400' : 'text-slate-600 dark:text-slate-300'}`}>{cat.name}</span>
                                 </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                                    <button onClick={() => openEditModal(cat)} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:bg-white/5 rounded-xl border border-transparent hover:border-white/5 transition-all"><Pencil size={18} /></button>
-                                    <button onClick={() => { if (window.confirm('Remover esta categoria?')) deleteCategory(cat.id); }} className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-white/5 rounded-xl border border-transparent hover:border-white/5 transition-all"><Trash2 size={18} /></button>
+                                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                    <button onClick={() => openEditModal(cat)} className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-cyan-400 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/5 transition-all"><Pencil size={14} /></button>
+                                    <button onClick={() => { if (window.confirm('Remover esta categoria?')) deleteCategory(cat.id); }} className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-500 hover:bg-white/5 rounded-lg border border-transparent hover:border-white/5 transition-all"><Trash2 size={14} /></button>
                                 </div>
                             </div>
                         ))}
@@ -211,10 +232,28 @@ export const Categories = () => {
                                 <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-3 px-1">Tipo de Fluxo</label>
                                 <select
                                     className="category-input w-full appearance-none"
-                                    value={editType} onChange={(e) => setEditType(e.target.value as TransactionType)}
+                                    value={editType} onChange={(e) => {
+                                        setEditType(e.target.value as TransactionType);
+                                        setEditParent('');
+                                    }}
                                 >
                                     <option value="income">Receita (Entrada)</option>
                                     <option value="expense">Despesa (Saída)</option>
+                                </select>
+                            </div>
+                            <div className="group">
+                                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-3 px-1">Categoria Superior</label>
+                                <select
+                                    className="category-input w-full appearance-none cursor-pointer"
+                                    value={editParent}
+                                    onChange={(e) => setEditParent(e.target.value)}
+                                >
+                                    <option value="">Nenhuma (Nível Principal)</option>
+                                    {(editType === 'income' ? incomeCategories : expenseCategories)
+                                        .filter(cat => cat.id !== editingCategory.id) // previne auto-relacionamento
+                                        .map(cat => (
+                                            <option key={cat.id} value={cat.id}>{cat.displayName}</option>
+                                        ))}
                                 </select>
                             </div>
                             <div className="flex justify-end gap-6 pt-6">
