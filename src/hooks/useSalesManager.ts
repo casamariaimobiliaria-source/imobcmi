@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 export const useSalesManager = () => {
-    const { sales, agents, clients, developers, addSale, updateSale, deleteSale, user } = useApp();
+    const { sales, agents, clients, developers, projects, addSale, updateSale, deleteSale, user } = useApp();
     const [view, setView] = useState<'list' | 'form'>('list');
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -147,6 +147,7 @@ export const useSalesManager = () => {
             agents,
             clients,
             developers,
+            projects,
             user
         },
         actions: {

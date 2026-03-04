@@ -8,13 +8,13 @@ interface KanbanColumnProps {
     id: string;
     title: string;
     deals: Deal[];
-    getClientName: (id?: string | null) => string | undefined;
+    getEntityName: (deal: Deal) => string | undefined;
     color?: string;
     onDealClick?: (deal: Deal) => void;
     [key: string]: any;
 }
 
-export const KanbanColumn = ({ id, title, deals, getClientName, color = 'bg-cyan-500/10', onDealClick }: KanbanColumnProps) => {
+export const KanbanColumn = ({ id, title, deals, getEntityName, color = 'bg-cyan-500/10', onDealClick }: KanbanColumnProps) => {
     const { setNodeRef } = useDroppable({
         id: id,
     });
@@ -48,7 +48,7 @@ export const KanbanColumn = ({ id, title, deals, getClientName, color = 'bg-cyan
                     <KanbanCard
                         key={deal.id}
                         deal={deal}
-                        clientName={getClientName(deal.client_id)}
+                        clientName={getEntityName(deal)}
                         onClick={onDealClick}
                     />
                 ))}

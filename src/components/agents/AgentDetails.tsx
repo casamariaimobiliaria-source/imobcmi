@@ -1,7 +1,7 @@
 import React from 'react';
 import { Agent, Sale } from '../../types';
 import { formatCurrency, formatDate } from '../../utils';
-import { X, Pencil, Trash2, Mail, Phone, FileText, MapPin, Sparkles, User as UserIcon } from 'lucide-react';
+import { X, Pencil, Trash2, Mail, Phone, FileText, MapPin, Sparkles, User as UserIcon, Briefcase, Link as LinkIcon, Calendar } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 
@@ -61,11 +61,23 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({
                             <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground bg-secondary/50 px-3 py-1.5 rounded-lg border border-border/40 truncate"><Mail size={12} className="text-primary flex-shrink-0" /> {agent.email}</div>
                             <div className="flex items-center gap-2 text-[11px] font-bold text-foreground bg-secondary/50 px-3 py-1.5 rounded-lg border border-border/40 truncate"><Phone size={12} className="text-primary flex-shrink-0" /> {agent.phone}</div>
                             <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest"><FileText size={12} className="text-muted-foreground flex-shrink-0" /> CRECI: {agent.creci}</div>
+                            {agent.birth_date && (
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest"><Calendar size={12} className="text-muted-foreground flex-shrink-0" /> NASC: {formatDate(agent.birth_date)}</div>
+                            )}
                         </div>
-                        {(agent.city || agent.address) && (
+                        {(agent.city || agent.address || agent.neighborhood) && (
                             <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
                                 <MapPin size={10} className="text-primary opacity-50 flex-shrink-0" />
-                                <span className="truncate">{agent.address}, {agent.number} • {agent.city}/{agent.state}</span>
+                                <span className="truncate">{agent.address}{agent.number ? `, ${agent.number}` : ''}{agent.neighborhood ? ` - ${agent.neighborhood}` : ''} • {agent.city}/{agent.state}</span>
+                            </div>
+                        )}
+                        {(agent.specialties?.length ?? 0) > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {agent.specialties!.map(spec => (
+                                    <span key={spec} className="px-2 py-1 rounded bg-primary/10 text-primary text-[9px] font-black uppercase tracking-wider italic">
+                                        {spec}
+                                    </span>
+                                ))}
                             </div>
                         )}
                     </div>
@@ -90,6 +102,31 @@ export const AgentDetails: React.FC<AgentDetailsProps> = ({
                             </p>
                         </Card>
                     </div>
+
+                    {/* Additional Details */}
+                    {(agent.experience_years || agent.previous_agencies || agent.instagram_url || agent.linkedin_url) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {(agent.experience_years || agent.previous_agencies || agent.cnai) && (
+                                <Card className="!bg-secondary/10 border-border/20 p-4">
+                                    <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-3 italic flex items-center gap-2"><Briefcase size={12} className="text-primary" /> Perfil Profissional</p>
+                                    <div className="space-y-2">
+                                        {agent.experience_years && <p className="text-xs text-foreground flex justify-between"><span className="text-muted-foreground">Tempo Mercado:</span> <b>{agent.experience_years} anos</b></p>}
+                                        {agent.previous_agencies && <p className="text-xs text-foreground flex justify-between"><span className="text-muted-foreground">Ex Imobiliárias:</span> <b>{agent.previous_agencies}</b></p>}
+                                        {agent.cnai && <p className="text-xs text-foreground flex justify-between"><span className="text-muted-foreground">CNAI:</span> <b>{agent.cnai}</b></p>}
+                                    </div>
+                                </Card>
+                            )}
+                            {(agent.instagram_url || agent.linkedin_url) && (
+                                <Card className="!bg-secondary/10 border-border/20 p-4">
+                                    <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-3 italic flex items-center gap-2"><LinkIcon size={12} className="text-primary" /> Redes Sociais</p>
+                                    <div className="space-y-2">
+                                        {agent.instagram_url && <p className="text-xs text-foreground flex justify-between"><span className="text-muted-foreground">Instagram:</span> <a href={agent.instagram_url.startsWith('http') ? agent.instagram_url : `https://${agent.instagram_url}`} target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold truncate max-w-[150px]">{agent.instagram_url.replace('https://', '').replace('http://', '').replace('www.', '')}</a></p>}
+                                        {agent.linkedin_url && <p className="text-xs text-foreground flex justify-between"><span className="text-muted-foreground">LinkedIn:</span> <a href={agent.linkedin_url.startsWith('http') ? agent.linkedin_url : `https://${agent.linkedin_url}`} target="_blank" rel="noreferrer" className="text-primary hover:underline font-bold truncate max-w-[150px]">{agent.linkedin_url.replace('https://', '').replace('http://', '').replace('www.', '')}</a></p>}
+                                    </div>
+                                </Card>
+                            )}
+                        </div>
+                    )}
 
                     {/* History Table */}
                     <div>

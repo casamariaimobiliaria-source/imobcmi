@@ -35,6 +35,15 @@ export const agentSchema = z.object({
     state: z.string().optional(),
     number: z.string().optional(),
     neighborhood: z.string().optional(),
+    specialties: z.array(z.string()).optional(),
+    previous_agencies: z.string().optional(),
+    experience_years: z.coerce.number().optional(),
+    cnai: z.string().optional(),
+    instagram_url: z.string().optional(),
+    linkedin_url: z.string().optional(),
+    birth_date: z.string().optional(),
+    admission_date: z.string().optional(),
+    emergency_contact: z.string().optional(),
     organizationId: z.string().uuid().optional()
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Sale, Agent, Client, Developer, User } from '../../types';
+import { Sale, Agent, Client, Developer, User, Project } from '../../types';
 import { formatCurrency } from '../../utils';
 import { Save, Calculator, Building2, User as UserIcon, Scissors } from 'lucide-react';
 import { Input } from '../ui/Input';
@@ -13,6 +13,7 @@ interface SaleFormProps {
     agents: Agent[];
     clients: Client[];
     developers: Developer[];
+    projects: Project[];
     user: User | null;
     onSubmit: (e: React.FormEvent) => void;
     onCancel: () => void;
@@ -25,6 +26,7 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     agents,
     clients,
     developers,
+    projects,
     user,
     onSubmit,
     onCancel,
@@ -32,6 +34,7 @@ export const SaleForm: React.FC<SaleFormProps> = ({
 }) => {
     const isReadOnly = user?.role === 'agent';
     const activeAgents = agents.filter(a => a.status === 'active');
+    const filteredProjects = projects.filter(p => !formData.developerId || p.developer_id === formData.developerId);
 
     useEffect(() => {
         if (formData.unitValue !== undefined && formData.commissionPercent && formData.taxPercent && formData.agentSplitPercent !== undefined) {
@@ -62,11 +65,16 @@ export const SaleForm: React.FC<SaleFormProps> = ({
                 <div>
                     <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 border-b border-border/50 pb-2 italic">Dados do Imóvel</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Input as="select" label="Incorporadora" required disabled={isReadOnly} value={formData.developerId} onChange={e => setFormData({ ...formData, developerId: e.target.value })}>
+                        <Input as="select" label="Incorporadora" required disabled={isReadOnly} value={formData.developerId} onChange={e => {
+                            setFormData({ ...formData, developerId: e.target.value, projectId: '' });
+                        }}>
                             <option value="">Selecione...</option>
                             {developers.map(d => <option key={d.id} value={d.id}>{d.companyName}</option>)}
                         </Input>
-                        <Input label="Empreendimento (Projeto)" required disabled={isReadOnly} value={formData.projectId || ''} onChange={e => setFormData({ ...formData, projectId: e.target.value })} placeholder="Ex: Living One" />
+                        <Input as="select" label="Empreendimento (Projeto)" required disabled={isReadOnly || !formData.developerId} value={formData.projectId || ''} onChange={e => setFormData({ ...formData, projectId: e.target.value })}>
+                            <option value="">Selecione...</option>
+                            {filteredProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </Input>
                         <Input label="Unidade/Torre" required disabled={isReadOnly} value={formData.unit || ''} onChange={e => setFormData({ ...formData, unit: e.target.value })} placeholder="Ex: 104 - Bloco A" />
                         <Input type="date" label="Data da Venda" required disabled={isReadOnly} value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
                     </div>

@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Sale, Agent, Developer, Client } from '../types';
+import { Sale, Agent, Developer, Client, Project } from '../types';
 import { salesService } from '../services/salesService';
 import { agentService } from '../services/agentService';
 import { developerService } from '../services/developerService';
 import { clientService } from '../services/clientService';
+import { projectService } from '../services/projectService';
 import { supabase } from '../supabaseClient';
 import { useAuth } from './AuthContext';
 
@@ -14,18 +15,23 @@ interface SalesContextType {
     setAgents: React.Dispatch<React.SetStateAction<Agent[]>>;
     developers: Developer[];
     setDevelopers: React.Dispatch<React.SetStateAction<Developer[]>>;
+    projects: Project[];
+    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
     clients: Client[];
     setClients: React.Dispatch<React.SetStateAction<Client[]>>;
-    addSale: (sale: Sale) => Promise<void>;
+    addSale: (sale: Sale) => Promise<Sale>;
     updateSale: (id: string, data: Partial<Sale>) => Promise<void>;
     deleteSale: (id: string) => Promise<void>;
-    addAgent: (agent: Agent) => Promise<void>;
+    addAgent: (agent: Agent) => Promise<Agent>;
     updateAgent: (id: string, data: Partial<Agent>) => Promise<void>;
     deleteAgent: (id: string) => Promise<void>;
-    addDeveloper: (developer: Developer) => Promise<void>;
+    addDeveloper: (developer: Developer) => Promise<Developer>;
     updateDeveloper: (id: string, data: Partial<Developer>) => Promise<void>;
     deleteDeveloper: (id: string) => Promise<void>;
-    addClient: (client: Client) => Promise<void>;
+    addProject: (project: Project) => Promise<Project>;
+    updateProject: (id: string, data: Partial<Project>) => Promise<void>;
+    deleteProject: (id: string) => Promise<void>;
+    addClient: (client: Client) => Promise<Client>;
     updateClient: (id: string, data: Partial<Client>) => Promise<void>;
     deleteClient: (id: string) => Promise<void>;
 }
@@ -37,6 +43,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [sales, setSales] = useState<Sale[]>([]);
     const [agents, setAgents] = useState<Agent[]>([]);
     const [developers, setDevelopers] = useState<Developer[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
 
     const addSale = async (sale: Sale) => {
@@ -52,6 +59,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         const savedSale = await salesService.addSale({ ...sale, projectId: realProjectId, organizationId: user?.organizationId });
         setSales(prev => [savedSale, ...prev]);
+        return savedSale;
     };
 
     const updateSale = async (id: string, data: Partial<Sale>) => {
@@ -67,6 +75,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const addAgent = async (agent: Agent) => {
         const saved = await agentService.addAgent({ ...agent, organizationId: user?.organizationId });
         setAgents(prev => [saved, ...prev]);
+        return saved;
     };
 
     const updateAgent = async (id: string, data: Partial<Agent>) => {
@@ -82,6 +91,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const addDeveloper = async (developer: Developer) => {
         const saved = await developerService.addDeveloper({ ...developer, organizationId: user?.organizationId });
         setDevelopers(prev => [saved, ...prev]);
+        return saved;
     };
 
     const updateDeveloper = async (id: string, data: Partial<Developer>) => {
@@ -94,9 +104,26 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setDevelopers(prev => prev.filter(d => d.id !== id));
     };
 
+    const addProject = async (project: Project) => {
+        const saved = await projectService.addProject({ ...project, organizationId: user?.organizationId });
+        setProjects(prev => [saved, ...prev]);
+        return saved;
+    };
+
+    const updateProject = async (id: string, data: Partial<Project>) => {
+        await projectService.updateProject(id, data);
+        setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    };
+
+    const deleteProject = async (id: string) => {
+        await projectService.deleteProject(id);
+        setProjects(prev => prev.filter(p => p.id !== id));
+    };
+
     const addClient = async (client: Client) => {
         const saved = await clientService.addClient({ ...client, organizationId: user?.organizationId });
         setClients(prev => [saved, ...prev]);
+        return saved;
     };
 
     const updateClient = async (id: string, data: Partial<Client>) => {
@@ -111,9 +138,9 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     return (
         <SalesContext.Provider value={{
-            sales, setSales, agents, setAgents, developers, setDevelopers, clients, setClients,
+            sales, setSales, agents, setAgents, developers, setDevelopers, projects, setProjects, clients, setClients,
             addSale, updateSale, deleteSale, addAgent, updateAgent, deleteAgent,
-            addDeveloper, updateDeveloper, deleteDeveloper, addClient, updateClient, deleteClient
+            addDeveloper, updateDeveloper, deleteDeveloper, addProject, updateProject, deleteProject, addClient, updateClient, deleteClient
         }}>
             {children}
         </SalesContext.Provider>

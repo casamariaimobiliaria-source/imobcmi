@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 import {
   LayoutDashboard, Users, Building2, BadgeDollarSign, Wallet,
   LogOut, Menu, X, Briefcase, TrendingUp, FileBarChart, List, Calendar as CalendarIcon, Trello,
-  Bell, Check, Trash2, Sun, Moon, ChevronLeft, ChevronRight, ClipboardList
+  Bell, Check, Trash2, Sun, Moon, ChevronLeft, ChevronRight, ClipboardList, Map, Network
 } from 'lucide-react';
 import { useApp } from '../context/AppProvider';
 
@@ -28,31 +28,61 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Define all nav items
-  const allNavItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'agent'] },
-    { to: '/pipeline', label: 'Pipeline', icon: Trello, roles: ['admin', 'agent'] },
-    { to: '/calendar', label: 'Agenda', icon: CalendarIcon, roles: ['admin', 'agent'] },
-    { to: '/sales', label: 'Vendas', icon: BadgeDollarSign, roles: ['admin', 'agent'] },
-    { to: '/leads', label: 'Leads', icon: Users, roles: ['admin', 'agent'] },
-    { to: '/clients', label: 'Clientes', icon: Briefcase, roles: ['admin'] },
-    { to: '/agents', label: 'Corretores', icon: Users, roles: ['admin'] },
-    { to: '/developers', label: 'Incorporadoras', icon: Building2, roles: ['admin'] },
-    { to: '/finance', label: 'Contas Pagar/Receber', icon: Wallet, roles: ['admin'] },
-    { to: '/cash-flow', label: 'Fluxo de Caixa', icon: TrendingUp, roles: ['admin'] },
-    { to: '/reports', label: 'Relatórios', icon: FileBarChart, roles: ['admin', 'agent'] },
-    { to: '/users', label: 'Usuários', icon: Users, roles: ['admin'] },
-    { to: '/categories', label: 'Plano de Contas', icon: List, roles: ['admin'] },
-    { to: '/activity-log', label: 'Histórico', icon: ClipboardList, roles: ['admin'] },
-    { to: '/settings', label: 'Configurações', icon: Briefcase, roles: ['admin', 'agent'] },
+  // Define nav groups
+  const navGroups = [
+    {
+      title: 'Geral',
+      items: [
+        { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'agent'] },
+        { to: '/calendar', label: 'Agenda', icon: CalendarIcon, roles: ['admin', 'agent'] },
+      ]
+    },
+    {
+      title: 'CRM & Vendas',
+      items: [
+        { to: '/leads', label: 'Leads', icon: Users, roles: ['admin', 'agent'] },
+        { to: '/pipeline', label: 'Pipeline', icon: Trello, roles: ['admin', 'agent'] },
+        { to: '/sales', label: 'Vendas', icon: BadgeDollarSign, roles: ['admin', 'agent'] },
+        { to: '/clients', label: 'Clientes', icon: Briefcase, roles: ['admin'] },
+      ]
+    },
+    {
+      title: 'Gestão Imobiliária',
+      items: [
+        { to: '/projects', label: 'Projetos', icon: Map, roles: ['admin'] },
+        { to: '/developers', label: 'Incorporadoras', icon: Building2, roles: ['admin'] },
+        { to: '/agents', label: 'Corretores', icon: Users, roles: ['admin'] },
+        { to: '/lead-sources', label: 'Mídias e Origens', icon: Network, roles: ['admin', 'agent'] },
+      ]
+    },
+    {
+      title: 'Financeiro & Análise',
+      items: [
+        { to: '/finance', label: 'Contas Pagar/Receber', icon: Wallet, roles: ['admin'] },
+        { to: '/cash-flow', label: 'Fluxo de Caixa', icon: TrendingUp, roles: ['admin'] },
+        { to: '/reports', label: 'Relatórios', icon: FileBarChart, roles: ['admin', 'agent'] },
+        { to: '/categories', label: 'Plano de Contas', icon: List, roles: ['admin'] },
+      ]
+    },
+    {
+      title: 'Sistema',
+      items: [
+        { to: '/activity-log', label: 'Histórico', icon: ClipboardList, roles: ['admin'] },
+        { to: '/users', label: 'Usuários', icon: Users, roles: ['admin'] },
+        { to: '/settings', label: 'Configurações', icon: Briefcase, roles: ['admin', 'agent'] },
+      ]
+    }
   ];
 
-  // Filter based on user role
-  const navItems = allNavItems.filter(item => item.roles.includes(user?.role || 'admin'));
+  // Filter groups and items based on user role
+  const filteredNavGroups = navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => item.roles.includes(user?.role || 'admin'))
+  })).filter(group => group.items.length > 0);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden relative">
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none z-0"></div>
+    <div className="flex h-screen bg-background overflow-hidden relative print:bg-white print:h-auto print:overflow-visible">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none z-0 print:hidden"></div>
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -67,7 +97,7 @@ export const Layout = ({ children }: LayoutProps) => {
         ${sidebarOpen ? 'translate-x-0 outline outline-primary/20' : '-translate-x-full'}
         md:relative md:translate-x-0 border-r border-white/10 dark:border-white/5 shadow-[20px_0_60px_rgba(0,0,0,0.1)]
         ${isCollapsed ? 'w-24' : 'w-72'}
-        flex flex-col
+        flex flex-col print:hidden
       `} aria-label="Navegação Principal">
         {/* Logo Section */}
         <div className={`flex items-center gap-3 p-8 mb-4 transition-all duration-500 overflow-hidden ${isCollapsed ? 'justify-center px-4' : 'px-8'}`}>
@@ -108,41 +138,62 @@ export const Layout = ({ children }: LayoutProps) => {
 
         {/* Scrollable Nav Area */}
         <nav className="flex-1 overflow-y-auto no-scrollbar py-4" aria-label="Menu Lateral">
-          <ul className={`px-4 space-y-2 transition-all duration-500 ${isCollapsed ? 'px-3' : ''}`}>
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
-                  className={({ isActive }) => `
-                    flex items-center rounded-2xl transition-all duration-500 group relative overflow-hidden h-14
-                    ${isCollapsed ? 'justify-center px-0 w-14 mx-auto' : 'px-5 gap-5 w-full'}
-                    ${isActive
-                      ? 'bg-gradient-to-r from-primary/20 via-primary/5 to-transparent text-primary shadow-[0_0_30px_rgba(6,182,212,0.15)] ring-1 ring-white/10'
-                      : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}
-                  `}
-                  aria-current={({ isActive }: { isActive: boolean }) => isActive ? 'page' : undefined}
-                >
-                  <item.icon size={22} className={`flex-shrink-0 transition-all duration-500 group-hover:scale-110 group-active:scale-90 ${isCollapsed ? '' : ''}`} aria-hidden="true" />
-                  {!isCollapsed && (
-                    <span className="font-extrabold text-[11px] uppercase tracking-[0.1em] italic truncate">
-                      {item.label}
-                    </span>
-                  )}
+          {filteredNavGroups.map((group, groupIdx) => (
+            <div key={group.title} className={groupIdx > 0 ? 'mt-6' : ''}>
+              {/* Group Header */}
+              {!isCollapsed ? (
+                <div className="px-8 mt-4 mb-3">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">
+                    {group.title}
+                  </h3>
+                </div>
+              ) : groupIdx > 0 ? (
+                <div className="px-6 mb-4">
+                  <div className="border-t border-white/5 w-full"></div>
+                </div>
+              ) : null}
 
-                  {/* Active Indicator Bar */}
-                  <NavLink to={item.to} className={({ isActive }) => `absolute left-0 w-1 rounded-r-full transition-all duration-700 ${isActive ? 'h-8 bg-primary animate-in slide-in-from-left-2' : 'h-0 bg-transparent'}`} />
+              <ul className={`px-4 space-y-2 transition-all duration-500 ${isCollapsed ? 'px-3' : ''}`}>
+                {group.items.map((item) => (
+                  <li key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      onClick={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
+                      className={({ isActive }) => `
+                        flex items-center rounded-2xl transition-all duration-500 group relative overflow-hidden h-14
+                        ${isCollapsed ? 'justify-center px-0 w-14 mx-auto' : 'px-5 gap-5 w-full'}
+                        ${isActive
+                          ? 'bg-gradient-to-r from-primary/20 via-primary/5 to-transparent text-primary shadow-[0_0_30px_rgba(6,182,212,0.15)] ring-1 ring-white/10'
+                          : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}
+                      `}
+                      aria-current={({ isActive }: { isActive: boolean }) => isActive ? 'page' : undefined}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon size={22} className={`flex-shrink-0 transition-all duration-500 group-hover:scale-110 group-active:scale-90 ${isCollapsed ? '' : ''}`} aria-hidden="true" />
+                          {!isCollapsed && (
+                            <span className="font-extrabold text-[11px] uppercase tracking-[0.1em] italic truncate text-foreground/80 group-hover:text-foreground transition-colors">
+                              {item.label}
+                            </span>
+                          )}
 
-                  {/* Tooltip for Collapsed State */}
-                  {isCollapsed && (
-                    <div className="absolute left-20 bg-black/90 text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2.5 rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 pointer-events-none z-50 whitespace-nowrap shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl">
-                      {item.label}
-                    </div>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+                          {/* Active Indicator Bar */}
+                          <div className={`absolute left-0 w-1 rounded-r-full transition-all duration-700 ${isActive ? 'h-8 bg-primary animate-in slide-in-from-left-2' : 'h-0 bg-transparent'}`} />
+
+                          {/* Tooltip for Collapsed State */}
+                          {isCollapsed && (
+                            <div className="absolute left-20 bg-black/90 text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2.5 rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 pointer-events-none z-50 whitespace-nowrap shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+                              {item.label}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         <div className="flex-shrink-0 p-6 border-t border-white/10 bg-gradient-to-t from-black/20 to-transparent">
@@ -158,8 +209,8 @@ export const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-700 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent">
-        <header className="h-24 flex items-center justify-between px-6 md:px-12 relative z-30 w-full backdrop-blur-sm">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-700 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent print:bg-transparent print:p-0">
+        <header className="h-24 flex items-center justify-between px-6 md:px-12 relative z-30 w-full backdrop-blur-sm print:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden p-3 text-foreground bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all active:scale-95"
@@ -274,7 +325,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 md:p-8">
+        <main className="flex-1 overflow-auto p-4 md:p-8 print:p-0 print:overflow-visible">
           {children || <Outlet />}
         </main>
       </div>

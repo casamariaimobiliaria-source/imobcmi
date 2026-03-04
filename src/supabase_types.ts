@@ -26,6 +26,15 @@ export type Database = {
                     phone: string | null
                     pix_key: string | null
                     state: string | null
+                    specialties: string[] | null
+                    previous_agencies: string | null
+                    experience_years: number | null
+                    cnai: string | null
+                    instagram_url: string | null
+                    linkedin_url: string | null
+                    birth_date: string | null
+                    admission_date: string | null
+                    emergency_contact: string | null
                     status: string | null
                     total_commission_earned: number | null
                     total_commission_paid: number | null
@@ -47,6 +56,15 @@ export type Database = {
                     phone?: string | null
                     pix_key?: string | null
                     state?: string | null
+                    specialties?: string[] | null
+                    previous_agencies?: string | null
+                    experience_years?: number | null
+                    cnai?: string | null
+                    instagram_url?: string | null
+                    linkedin_url?: string | null
+                    birth_date?: string | null
+                    admission_date?: string | null
+                    emergency_contact?: string | null
                     status?: string | null
                     total_commission_earned?: number | null
                     total_commission_paid?: number | null
@@ -68,6 +86,15 @@ export type Database = {
                     phone?: string | null
                     pix_key?: string | null
                     state?: string | null
+                    specialties?: string[] | null
+                    previous_agencies?: string | null
+                    experience_years?: number | null
+                    cnai?: string | null
+                    instagram_url?: string | null
+                    linkedin_url?: string | null
+                    birth_date?: string | null
+                    admission_date?: string | null
+                    emergency_contact?: string | null
                     status?: string | null
                     total_commission_earned?: number | null
                     total_commission_paid?: number | null
@@ -368,6 +395,7 @@ export type Database = {
                     value: number
                     stage: string
                     client_id: string | null
+                    lead_id: string | null
                     agent_id: string | null
                     created_at: string
                     updated_at: string
@@ -379,6 +407,7 @@ export type Database = {
                     value: number
                     stage: string
                     client_id?: string | null
+                    lead_id?: string | null
                     agent_id?: string | null
                     created_at?: string
                     updated_at?: string
@@ -390,6 +419,7 @@ export type Database = {
                     value?: number
                     stage?: string
                     client_id?: string | null
+                    lead_id?: string | null
                     agent_id?: string | null
                     created_at?: string
                     updated_at?: string
@@ -473,6 +503,30 @@ export type Database = {
                         referencedColumns: ["id"]
                     }
                 ]
+            }
+            lead_sources: {
+                Row: {
+                    id: string
+                    name: string
+                    status: string | null
+                    organization_id: string | null
+                    created_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    status?: string | null
+                    organization_id?: string | null
+                    created_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    status?: string | null
+                    organization_id?: string | null
+                    created_at?: string | null
+                }
+                Relationships: []
             }
             sales: {
                 Row: {

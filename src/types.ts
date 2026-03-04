@@ -180,6 +180,7 @@ export interface AppContextType {
   user: User | null;
   settings: OrganizationSettings | null;
   loading: boolean;
+  fetchData: (showLoading?: boolean) => Promise<void>;
   login: (email?: string, password?: string) => Promise<void>;
   logout: () => void;
   theme: 'dark' | 'light' | 'system';
@@ -243,14 +244,14 @@ export interface AppContextType {
   refreshEvents: () => void;
 
   deals: Deal[];
-  addDeal: (deal: Deal) => void;
-  updateDeal: (id: string, data: Partial<Deal>) => void;
-  deleteDeal: (id: string) => void;
+  addDeal: (deal: Deal) => Promise<Deal>;
+  updateDeal: (id: string, data: Partial<Deal>) => Promise<void>;
+  deleteDeal: (id: string) => Promise<void>;
 
   leads: Lead[];
-  addLead: (lead: Lead) => void;
-  updateLead: (id: string, data: Partial<Lead>) => void;
-  deleteLead: (id: string) => void;
+  addLead: (lead: Lead) => Promise<Lead>;
+  updateLead: (id: string, data: Partial<Lead>) => Promise<void>;
+  deleteLead: (id: string) => Promise<void>;
 }
 
 export interface Notification {
@@ -281,6 +282,7 @@ export interface Deal {
   value: number;
   stage: 'lead' | 'contact' | 'visit' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
   client_id?: string | null;
+  lead_id?: string | null;
   agent_id?: string | null;
   created_at: string;
   updated_at: string;
@@ -301,5 +303,22 @@ export interface Lead {
   user_id?: string;
   created_at: string;
   proximo_contato?: string;
+  organizationId?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  developerId: string;
+  status: Status;
+  address?: string;
+  notes?: string;
+  organizationId?: string;
+}
+
+export interface LeadSource {
+  id: string;
+  name: string;
+  status: Status;
   organizationId?: string;
 }

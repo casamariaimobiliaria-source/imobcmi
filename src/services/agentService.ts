@@ -33,6 +33,15 @@ export const agentService = {
             status: (a.status as any) || 'active',
             totalCommissionEarned: a.total_commission_earned || 0,
             totalCommissionPaid: a.total_commission_paid || 0,
+            specialties: a.specialties || [],
+            previous_agencies: a.previous_agencies || '',
+            experience_years: a.experience_years || 0,
+            cnai: a.cnai || '',
+            instagram_url: a.instagram_url || '',
+            linkedin_url: a.linkedin_url || '',
+            birth_date: a.birth_date || '',
+            admission_date: a.admission_date || '',
+            emergency_contact: a.emergency_contact || '',
             organizationId: a.organization_id || undefined
         }));
     },
@@ -55,6 +64,15 @@ export const agentService = {
             state: validatedAgent.state,
             pix_key: (agent as any).pixKey,
             bank_details: (agent as any).bankDetails,
+            specialties: validatedAgent.specialties,
+            previous_agencies: validatedAgent.previous_agencies,
+            experience_years: validatedAgent.experience_years,
+            cnai: validatedAgent.cnai,
+            instagram_url: validatedAgent.instagram_url,
+            linkedin_url: validatedAgent.linkedin_url,
+            birth_date: validatedAgent.birth_date,
+            admission_date: validatedAgent.admission_date,
+            emergency_contact: validatedAgent.emergency_contact,
             organization_id: agent.organizationId
         };
 
@@ -71,11 +89,15 @@ export const agentService = {
     async updateAgent(id: string, agentData: Partial<Agent>): Promise<void> {
         const validatedUpdate = agentSchema.partial().parse(agentData);
 
-        const updateData: any = {};
-        if (validatedUpdate.name) updateData.name = validatedUpdate.name;
-        if (validatedUpdate.status) updateData.status = validatedUpdate.status;
-        if (validatedUpdate.email) updateData.email = validatedUpdate.email;
-        if (validatedUpdate.phone) updateData.phone = validatedUpdate.phone;
+        const updateData: any = { ...validatedUpdate };
+
+        // Remove Zod format differences and remap them to Supabase format
+        updateData.zip_code = validatedUpdate.zipCode; delete updateData.zipCode;
+        updateData.pix_key = (agentData as any).pixKey;
+        updateData.bank_details = (agentData as any).bankDetails;
+
+        // Limpar chaves undefined para não corromper query
+        Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
         const { error } = await supabase.from('agents').update(updateData).eq('id', id);
         if (error) throw error;

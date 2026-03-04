@@ -9,9 +9,11 @@ import { salesService } from '../services/salesService';
 import { agentService } from '../services/agentService';
 import { clientService } from '../services/clientService';
 import { developerService } from '../services/developerService';
+import { projectService } from '../services/projectService';
 import { financeService } from '../services/financeService';
 import { dealService } from '../services/dealService';
 import { leadService } from '../services/leadService';
+import { leadSourceService } from '../services/leadSourceService';
 
 import { AuthProvider, useAuth } from './AuthContext';
 import { UIProvider, useUI } from './UIContext';
@@ -24,30 +26,32 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, settings, loading: authLoading, login, logout, updateSettings } = useAuth();
   const { theme, setTheme, notifications, markNotificationAsRead, clearAllNotifications, events, setEvents, refreshEvents, setNotifications } = useUI();
-  const { sales, setSales, agents, setAgents, developers, setDevelopers, clients, setClients, addSale, updateSale, deleteSale, addAgent, updateAgent, deleteAgent, addDeveloper, updateDeveloper, deleteDeveloper, addClient, updateClient, deleteClient } = useSales();
+  const { sales, setSales, agents, setAgents, developers, setDevelopers, projects, setProjects, clients, setClients, addSale, updateSale, deleteSale, addAgent, updateAgent, deleteAgent, addDeveloper, updateDeveloper, deleteDeveloper, addProject, updateProject, deleteProject, addClient, updateClient, deleteClient } = useSales();
   const { financialRecords, setFinancialRecords, categories, setCategories, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord, addCategory, updateCategory, deleteCategory, bankAccounts, setBankAccounts, addBankAccount, updateBankAccount, deleteBankAccount, paymentMethods, setPaymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod } = useFinance();
-  const { deals, setDeals, leads, setLeads, addDeal, updateDeal, deleteDeal, addLead, updateLead, deleteLead } = useCRM();
+  const { deals, setDeals, leads, setLeads, addDeal, updateDeal, deleteDeal, addLead, updateLead, deleteLead, leadSources, setLeadSources, addLeadSource, updateLeadSource, deleteLeadSource } = useCRM();
 
   const [loading, setLoading] = useState(true);
   const [usersList, setUsersList] = useState<any[]>([]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const orgId = user?.organizationId;
       const [
-        agentsData, clientsData, developersData, salesData,
-        financeData, categoriesData, dealsData, leadsData,
+        agentsData, clientsData, developersData, projectsData, salesData,
+        financeData, categoriesData, dealsData, leadsData, leadSourcesData,
         usersResponse, eventsResponse, bankAccountsData, paymentMethodsData
       ] = await Promise.all([
         agentService.getAgents(orgId),
         clientService.getClients(orgId),
         developerService.getDevelopers(orgId),
+        projectService.getProjects(orgId),
         salesService.getSales(orgId),
         financeService.getFinancialRecords(orgId),
         financeService.getCategories(orgId),
         dealService.getDeals(orgId),
         leadService.getLeads(orgId),
+        leadSourceService.getLeadSources(orgId),
         supabase.from('users').select('*'),
         supabase.from('events').select('*'),
         financeService.getBankAccounts(orgId),
@@ -57,6 +61,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
       setAgents(agentsData);
       setClients(clientsData);
       setDevelopers(developersData);
+      setProjects(projectsData);
       setSales(salesData);
       setFinancialRecords(financeData);
       setCategories(categoriesData);
@@ -64,22 +69,23 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
       setPaymentMethods(paymentMethodsData);
       setDeals(dealsData);
       setLeads(leadsData);
+      setLeadSources(leadSourcesData);
       if (usersResponse.data) setUsersList(usersResponse.data);
       if (eventsResponse.data) setEvents(eventsResponse.data);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) { // Only fetch data if a user is logged in
-      fetchData();
+    if (user?.id) { // Only fetch data if a user is logged in
+      fetchData(true);
     } else {
       setLoading(false); // If no user, stop loading
     }
-  }, [user]);
+  }, [user?.id]);
 
   // Notifications Logic (Internal to Orchestrator for now)
   const checkNotifications = () => {
@@ -150,26 +156,26 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Realtime Subscriptions
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     console.log('Setting up realtime subscriptions...');
     const channel = supabase.channel('app-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, (p) => {
-        fetchData();
+        fetchData(false);
         if (p.eventType === 'INSERT') toast.success('Nova venda registrada!');
         if (p.eventType === 'UPDATE' && (p.new as any).status === 'approved') toast.success('Venda aprovada com sucesso!');
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, (p) => {
-        fetchData();
+        fetchData(false);
         if (p.eventType === 'INSERT') toast.info('Novo negócio no pipeline!');
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (p) => {
-        fetchData();
+        fetchData(false);
         if (p.eventType === 'INSERT') toast.info('Novo lead recebido!');
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_records' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_records' }, () => fetchData(false))
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user?.id]);
 
   const addUser = async (u: any) => {
     const { data, error } = await supabase.from('users').insert([{ name: u.name, email: u.email, role: u.role, phone: u.phone, organization_id: user?.organizationId }]).select().single();
@@ -217,23 +223,31 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success('Usuário excluído com sucesso!');
   };
 
+  const providerValue = React.useMemo(() => ({
+    user, settings, loading: loading || authLoading, login, logout, updateSettings, theme, setTheme,
+    usersList, addUser, updateUser, deleteUser,
+    agents, addAgent, updateAgent, deleteAgent,
+    clients, addClient, updateClient, deleteClient,
+    developers, addDeveloper, updateDeveloper, deleteDeveloper,
+    projects, addProject, updateProject, deleteProject,
+    sales, addSale, updateSale, deleteSale,
+    financialRecords, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord,
+    categories, addCategory, updateCategory, deleteCategory,
+    bankAccounts, addBankAccount, updateBankAccount, deleteBankAccount,
+    paymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod,
+    notifications, markNotificationAsRead, clearAllNotifications,
+    events, refreshEvents, fetchData,
+    deals, addDeal, updateDeal, deleteDeal,
+    leads, addLead, updateLead, deleteLead,
+    leadSources, addLeadSource, updateLeadSource, deleteLeadSource
+  }), [
+    user, settings, loading, authLoading, theme, setTheme,
+    usersList, agents, clients, developers, projects, sales, financialRecords, categories, bankAccounts, paymentMethods,
+    notifications, events, deals, leads, leadSources, fetchData
+  ]);
+
   return (
-    <AppContext.Provider value={{
-      user, settings, loading: loading || authLoading, login, logout, updateSettings, theme, setTheme,
-      usersList, addUser, updateUser, deleteUser,
-      agents, addAgent, updateAgent, deleteAgent,
-      clients, addClient, updateClient, deleteClient,
-      developers, addDeveloper, updateDeveloper, deleteDeveloper,
-      sales, addSale, updateSale, deleteSale,
-      financialRecords, addFinancialRecord, updateFinancialRecord, deleteFinancialRecord,
-      categories, addCategory, updateCategory, deleteCategory,
-      bankAccounts, addBankAccount, updateBankAccount, deleteBankAccount,
-      paymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod,
-      notifications, markNotificationAsRead, clearAllNotifications,
-      events, refreshEvents,
-      deals, addDeal, updateDeal, deleteDeal,
-      leads, addLead, updateLead, deleteLead
-    }}>
+    <AppContext.Provider value={providerValue}>
       {children}
     </AppContext.Provider>
   );

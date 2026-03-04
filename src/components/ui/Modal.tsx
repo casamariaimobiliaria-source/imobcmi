@@ -34,14 +34,21 @@ export const Modal: React.FC<ModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6">
-            {/* Backdrop */}
+            {/* Backdrop Visual Component */}
+            <div className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-500 pointer-events-none" />
+
+            {/* Clickable Overlay explicitly for closing */}
             <div
-                className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-500"
+                className="absolute inset-0 z-0"
                 onClick={onClose}
+                aria-label="Close modal"
             />
 
             {/* Modal Content */}
-            <div className={`relative glass-thick w-full ${maxWidth} shadow-[0_0_50px_rgba(0,0,0,0.3)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-[2.5rem] border border-white/20 dark:border-white/10 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 fade-in duration-500`}>
+            <div
+                className={`relative z-10 glass-thick w-full ${maxWidth} shadow-[0_0_50px_rgba(0,0,0,0.3)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-[2.5rem] border border-white/20 dark:border-white/10 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 fade-in duration-500`}
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header */}
                 <div className="bg-white/5 dark:bg-white/[0.02] p-6 md:p-8 flex justify-between items-center border-b border-white/10 backdrop-blur-3xl relative overflow-hidden shimmer">
                     <div className="relative z-10">
@@ -51,6 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
+                        type="button"
                         className="relative z-10 text-muted-foreground hover:text-red-400 transition-all hover:rotate-90 bg-white/5 p-2.5 rounded-full border border-white/10 hover:border-red-500/30"
                     >
                         <X size={22} />

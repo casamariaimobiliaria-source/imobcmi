@@ -16,7 +16,7 @@ import { MobileCard } from '../components/ui/MobileCard';
 import { Trash2, Users, Briefcase, MapPin, Phone, Mail } from 'lucide-react';
 
 export const Clients = () => {
-  const { agents } = useApp();
+  const { agents, leads } = useApp();
   const { state, actions } = useClientManager();
   const {
     searchTerm, isModalOpen, isDetailsOpen, selectedClient, editingId,
@@ -131,6 +131,7 @@ export const Clients = () => {
         onSubmit={actions.handleSave}
         editingId={editingId}
         togglePreference={actions.togglePreference}
+        leads={leads}
       />
     </div>
   );

@@ -16,7 +16,7 @@ export const Sales = () => {
   const {
     view, editingId, formData, receiptSale, isExporting, receiptRef,
     searchTerm, showFilters, filterDateStart, filteredSales,
-    agents, clients, developers, user
+    agents, clients, developers, projects, user
   } = state;
 
   return (
@@ -68,6 +68,7 @@ export const Sales = () => {
           agents={agents}
           clients={clients}
           developers={developers}
+          projects={projects}
           user={user}
           onSubmit={actions.handleSubmit}
           onCancel={() => actions.setView('list')}

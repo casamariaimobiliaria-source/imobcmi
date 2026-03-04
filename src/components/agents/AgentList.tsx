@@ -1,6 +1,6 @@
 import React from 'react';
 import { Agent } from '../../types';
-import { Search, Plus, ChevronRight } from 'lucide-react';
+import { Search, Plus, ChevronRight, Printer } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 
@@ -25,12 +25,21 @@ export const AgentList: React.FC<AgentListProps> = ({
         <div className="flex flex-col h-full premium-card !rounded-[2rem] border-white/10 overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-secondary/30">
                 <h2 className="text-lg font-black text-foreground italic uppercase tracking-tighter">Corretores <span className="text-primary">Parceiros</span></h2>
-                <button
-                    onClick={onAdd}
-                    className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
-                >
-                    <Plus size={20} />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => window.print()}
+                        title="Imprimir Ficha de Cadastro em Branco"
+                        className="w-10 h-10 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center border border-white/5 hover:bg-secondary/80 hover:text-foreground transition-all"
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
+                        onClick={onAdd}
+                        className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                    >
+                        <Plus size={20} />
+                    </button>
+                </div>
             </div>
 
             <div className="p-4 border-b border-white/10 bg-card">

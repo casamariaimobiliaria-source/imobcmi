@@ -23,23 +23,29 @@ export const leadService = {
     },
 
     addLead: async (lead: Partial<Lead> & { organizationId?: string }): Promise<Lead> => {
+        const payload: any = {
+            name: lead.nome,
+            nome: lead.nome,
+            telefone: lead.telefone || null,
+            email: lead.email || null,
+            midia: lead.midia || null,
+            data_compra: lead.data_compra || null,
+            corretor: lead.corretor || null,
+            empreendimento: lead.empreendimento || null,
+            temperatura: lead.temperatura || null,
+            status: lead.status || 'novo',
+            historico: lead.historico || null,
+            user_id: lead.user_id || null,
+            proximo_contato: lead.proximo_contato || null,
+        };
+
+        if (lead.organizationId) {
+            payload.organization_id = lead.organizationId;
+        }
+
         const { data, error } = await supabase
             .from('leads')
-            .insert([{
-                nome: lead.nome,
-                telefone: lead.telefone,
-                email: lead.email,
-                midia: lead.midia,
-                data_compra: lead.data_compra || null,
-                corretor: lead.corretor,
-                empreendimento: lead.empreendimento,
-                temperatura: lead.temperatura,
-                status: lead.status || 'novo',
-                historico: lead.historico,
-                user_id: lead.user_id,
-                proximo_contato: lead.proximo_contato || null,
-                organization_id: lead.organizationId
-            }] as any[])
+            .insert([payload])
             .select()
             .single();
 
@@ -63,8 +69,12 @@ export const leadService = {
     updateLead: async (id: string, lead: Partial<Lead>): Promise<void> => {
         const updateData: any = {
             ...lead,
-            organization_id: lead.organizationId
+            name: lead.nome // Mantém a coluna name que o banco exige
         };
+
+        if (lead.organizationId) {
+            updateData.organization_id = lead.organizationId;
+        }
 
         // Remove o campo organizationId antes de enviar para o Supabase
         delete updateData.organizationId;

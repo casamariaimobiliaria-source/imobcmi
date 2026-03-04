@@ -31,7 +31,7 @@ const STATUS_OPTIONS = [
 ];
 
 export const Leads = () => {
-    const { leads, addLead, updateLead, deleteLead, agents, developers } = useApp();
+    const { leads, addLead, updateLead, deleteLead, addDeal, agents, developers, projects, leadSources } = useApp();
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
     const [searchTerm, setSearchTerm] = useState('');
     const [tempFilter, setTempFilter] = useState<string | null>(null);
@@ -58,6 +58,15 @@ export const Leads = () => {
         } finally {
             setIsAnalyzing(false);
         }
+    };
+
+    const formatPhoneNumber = (value: string) => {
+        if (!value) return '';
+        const numbers = value.replace(/\D/g, '');
+        if (numbers.length <= 10) {
+            return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').trim();
+        }
+        return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').trim();
     };
 
     const [formData, setFormData] = useState<Partial<Lead>>({
@@ -155,8 +164,25 @@ export const Leads = () => {
                 await updateLead(editingLead.id, formData);
                 toast.success('Lead atualizado com sucesso!');
             } else {
-                await addLead(formData as Lead);
-                toast.success('Novo lead cadastrado!');
+                const savedLead = await addLead(formData as Lead);
+
+                // Automatic deal creation in the Pipeline
+                try {
+                    await addDeal({
+                        id: '',
+                        title: savedLead.empreendimento || `Negócio: ${savedLead.nome}`,
+                        value: 0,
+                        lead_id: savedLead.id,
+                        stage: 'lead',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        organizationId: savedLead.organizationId
+                    } as any);
+                    toast.success('Novo lead cadastrado e enviado ao Pipeline!');
+                } catch (dealErr) {
+                    console.error('Erro ao criar card no pipeline automatically:', dealErr);
+                    toast.success('Lead cadastrado, mas houve um erro ao criar card no pipeline.');
+                }
             }
             setIsModalOpen(false);
         } catch (err) {
@@ -566,7 +592,8 @@ export const Leads = () => {
                                                 icon={<Phone size={16} />}
                                                 placeholder="(00) 00000-0000"
                                                 value={formData.telefone || ''}
-                                                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                                                maxLength={15}
+                                                onChange={(e) => setFormData({ ...formData, telefone: formatPhoneNumber(e.target.value) })}
                                             />
                                             <Input
                                                 label="E-mail"
@@ -590,7 +617,7 @@ export const Leads = () => {
                                         </div>
                                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Passo 2: Qualificação e Origem</h4>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid gap-6">
                                         <Input
                                             as="select"
                                             label="Mídia de Origem"
@@ -598,18 +625,22 @@ export const Leads = () => {
                                             onChange={(e) => setFormData({ ...formData, midia: e.target.value })}
                                         >
                                             <option value="">Selecione...</option>
-                                            <option value="Instagram">Instagram</option>
-                                            <option value="Facebook">Facebook</option>
-                                            <option value="Google">Google Search</option>
-                                            <option value="Indicação">Indicação</option>
+                                            {leadSources.filter(s => s.status === 'active').map(s => (
+                                                <option key={s.id} value={s.name}>{s.name}</option>
+                                            ))}
                                         </Input>
                                         <Input
+                                            as="select"
                                             label="Empreendimento"
                                             icon={<Building2 size={16} />}
-                                            placeholder="Nome do projeto..."
                                             value={formData.empreendimento || ''}
                                             onChange={(e) => setFormData({ ...formData, empreendimento: e.target.value })}
-                                        />
+                                        >
+                                            <option value="">Selecione um projeto...</option>
+                                            {projects.map(p => (
+                                                <option key={p.id} value={p.name}>{p.name}</option>
+                                            ))}
+                                        </Input>
                                     </div>
                                     <div className="space-y-3">
                                         <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest italic">Temperatura Sugerida</label>

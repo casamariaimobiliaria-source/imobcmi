@@ -11,7 +11,9 @@ import { Finance } from './pages/Finance';
 import { CashFlow } from './pages/CashFlow';
 import { Clients } from './pages/Clients';
 import { Developers } from './pages/Developers';
+import { Projects } from './pages/Projects';
 import { Leads } from './pages/Leads';
+import { LeadSources } from './pages/LeadSources';
 import { Settings } from './pages/Settings';
 import { Categories } from './pages/Categories';
 import { Reports } from './pages/Reports';
@@ -61,6 +63,7 @@ const AppRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="sales" element={<Sales />} />
         <Route path="leads" element={<RoleRoute roles={['admin', 'agent']}><Leads /></RoleRoute>} />
+        <Route path="lead-sources" element={<RoleRoute roles={['admin', 'agent']}><LeadSources /></RoleRoute>} />
         <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
         {/* Admin Only Routes */}
@@ -70,6 +73,7 @@ const AppRoutes = () => {
         <Route path="cash-flow" element={<RoleRoute roles={['admin']}><CashFlow /></RoleRoute>} />
         <Route path="clients" element={<RoleRoute roles={['admin']}><Clients /></RoleRoute>} />
         <Route path="developers" element={<RoleRoute roles={['admin']}><Developers /></RoleRoute>} />
+        <Route path="projects" element={<RoleRoute roles={['admin']}><Projects /></RoleRoute>} />
         <Route path="categories" element={<RoleRoute roles={['admin']}><Categories /></RoleRoute>} />
         <Route path="activity-log" element={<RoleRoute roles={['admin']}><ActivityLog /></RoleRoute>} />
         <Route path="calendar" element={<RoleRoute roles={['admin', 'agent']}><Calendar /></RoleRoute>} />

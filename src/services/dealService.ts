@@ -23,6 +23,7 @@ export const dealService = {
             value: Number(d.value),
             stage: d.stage as any,
             client_id: d.client_id || undefined,
+            lead_id: d.lead_id || undefined,
             agent_id: d.agent_id || undefined,
             created_at: d.created_at,
             updated_at: d.updated_at,
@@ -38,6 +39,7 @@ export const dealService = {
                 value: deal.value || 0,
                 stage: deal.stage || 'lead',
                 client_id: deal.client_id || null,
+                lead_id: deal.lead_id || null,
                 agent_id: deal.agent_id || null,
                 organization_id: deal.organizationId || null
             }])
@@ -60,6 +62,7 @@ export const dealService = {
             value: Number(data.value),
             stage: data.stage as any,
             client_id: data.client_id || undefined,
+            lead_id: data.lead_id || undefined,
             agent_id: data.agent_id || undefined,
             created_at: data.created_at,
             updated_at: data.updated_at,
@@ -76,6 +79,7 @@ export const dealService = {
         if (deal.value !== undefined) updateData.value = deal.value;
         if (deal.stage !== undefined) updateData.stage = deal.stage;
         if (deal.client_id !== undefined) updateData.client_id = deal.client_id;
+        if (deal.lead_id !== undefined) updateData.lead_id = deal.lead_id;
         if (deal.agent_id !== undefined) updateData.agent_id = deal.agent_id;
 
         const { error } = await supabase

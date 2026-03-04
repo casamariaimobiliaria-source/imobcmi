@@ -19,18 +19,37 @@ const STAGES = [
 ];
 
 export const Pipeline = () => {
-    const { clients, agents } = useApp();
-    const [deals, setDeals] = useState<Deal[]>([]);
+    const {
+        clients, agents, leads, deals, projects,
+        addClient, addDeal, updateDeal, deleteDeal,
+        fetchData, loading: globalLoading
+    } = useApp();
+
     const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
-    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
     const [formData, setFormData] = useState({
         title: '',
         value: '',
         client_id: '',
+        lead_id: '',
         agent_id: ''
     });
+
+    const formatCurrency = (value: string | number) => {
+        const val = typeof value === 'string' ? value.replace(/\D/g, '') : value.toString();
+        const amount = Number(val) / 100;
+        if (isNaN(amount)) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+        }).format(amount);
+    };
+
+    const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = e.target.value.replace(/\D/g, '');
+        setFormData({ ...formData, value: rawValue });
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -40,43 +59,41 @@ export const Pipeline = () => {
         })
     );
 
-    useEffect(() => {
-        fetchDeals();
-    }, []);
-
-    const fetchDeals = async () => {
-        setLoading(true);
-        const { data, error } = await (supabase as any).from('deals').select('*');
-        if (error) {
-            console.error('Error fetching deals:', error);
-        } else {
-            setDeals(data || []);
+    const getEntityName = (deal: Deal) => {
+        if (deal.client_id) {
+            return clients.find(c => c.id === deal.client_id)?.name;
         }
-        setLoading(false);
-    };
-
-    const handleDeleteDeal = async (id: string) => {
-        if (confirm('Tem certeza que deseja excluir este negócio?')) {
-            const { error } = await (supabase as any).from('deals').delete().eq('id', id);
-            if (error) {
-                console.error('Error deleting deal:', error);
-                alert('Erro ao excluir negócio.');
-            } else {
-                setIsModalOpen(false);
-                fetchDeals();
-            }
+        if (deal.lead_id) {
+            return leads.find(l => l.id === deal.lead_id)?.nome;
         }
-    };
-
-    const getClientName = (id?: string | null) => {
-        if (!id) return undefined;
-        return clients.find(c => c.id === id)?.name;
+        return undefined;
     };
 
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
         const deal = deals.find(d => d.id === active.id);
         if (deal) setActiveDeal(deal);
+    };
+
+    const convertLeadToClient = async (leadId: string, orgId?: string) => {
+        const lead = leads.find(l => l.id === leadId);
+        if (!lead) return null;
+
+        try {
+            const newClient = await addClient({
+                id: '', // Will be generated
+                name: lead.nome,
+                email: lead.email || '',
+                phone: lead.telefone || '',
+                cpfCnpj: '', // Lead might not have this, leave empty for now
+                status: 'active',
+                organizationId: orgId || lead.organizationId
+            } as any);
+            return newClient.id;
+        } catch (error) {
+            console.error('Error converting lead to client:', error);
+            return null;
+        }
     };
 
     const handleDragEnd = async (event: DragEndEvent) => {
@@ -91,18 +108,29 @@ export const Pipeline = () => {
         const deal = deals.find(d => d.id === dealId);
         if (!deal || deal.stage === newStage) return;
 
-        setDeals(deals.map(d =>
-            d.id === dealId ? { ...d, stage: newStage } : d
-        ));
+        let clientUpdateId = deal.client_id;
 
-        const { error } = await (supabase as any)
-            .from('deals')
-            .update({ stage: newStage, updated_at: new Date().toISOString() })
-            .eq('id', dealId);
+        // Auto-conversion logic
+        if (newStage === 'closed_won' && !deal.client_id && deal.lead_id) {
+            const convertedClientId = await convertLeadToClient(deal.lead_id, deal.organizationId);
+            if (convertedClientId) {
+                clientUpdateId = convertedClientId;
+            }
+        }
 
-        if (error) {
+        try {
+            await updateDeal(dealId, {
+                stage: newStage,
+                client_id: clientUpdateId,
+                updated_at: new Date().toISOString()
+            });
+
+            if (newStage === 'closed_won') {
+                // Refresh data to show the new client correctly everywhere
+                fetchData(false);
+            }
+        } catch (error) {
             console.error('Error updating deal stage:', error);
-            fetchDeals();
             alert('Erro ao mover o card. Tente novamente.');
         }
     };
@@ -111,8 +139,9 @@ export const Pipeline = () => {
         setEditingDeal(deal);
         setFormData({
             title: deal.title,
-            value: deal.value.toString(),
+            value: (deal.value * 100).toString(), // Convert to raw integer-like string for the mask
             client_id: deal.client_id || '',
+            lead_id: deal.lead_id || '',
             agent_id: deal.agent_id || ''
         });
         setIsModalOpen(true);
@@ -122,10 +151,8 @@ export const Pipeline = () => {
         if (!editingDeal) return;
         if (confirm('Tem certeza que deseja excluir este negócio?')) {
             try {
-                const { error } = await (supabase as any).from('deals').delete().eq('id', editingDeal.id);
-                if (error) throw error;
+                await deleteDeal(editingDeal.id);
                 setIsModalOpen(false);
-                fetchDeals();
             } catch (error) {
                 console.error('Error deleting deal:', error);
                 alert('Erro ao excluir negócio.');
@@ -136,24 +163,30 @@ export const Pipeline = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const dealValue = Number(formData.value) / 100;
             const dealData = {
                 title: formData.title,
-                value: Number(formData.value),
+                value: dealValue,
                 client_id: formData.client_id || null,
+                lead_id: formData.lead_id || null,
                 agent_id: formData.agent_id || null,
                 updated_at: new Date().toISOString()
             };
 
-            const { error } = editingDeal
-                ? await (supabase as any).from('deals').update(dealData).eq('id', editingDeal.id)
-                : await (supabase as any).from('deals').insert([{ ...dealData, stage: 'lead', created_at: new Date().toISOString() }]);
-
-            if (error) throw error;
+            if (editingDeal) {
+                await updateDeal(editingDeal.id, dealData);
+            } else {
+                await addDeal({
+                    ...dealData,
+                    id: '',
+                    stage: 'lead',
+                    created_at: new Date().toISOString()
+                } as any);
+            }
 
             setIsModalOpen(false);
-            setFormData({ title: '', value: '', client_id: '', agent_id: '' });
+            setFormData({ title: '', value: '', client_id: '', lead_id: '', agent_id: '' });
             setEditingDeal(null);
-            fetchDeals();
         } catch (error) {
             console.error('Error saving deal:', error);
             alert('Erro ao salvar negócio.');
@@ -174,7 +207,7 @@ export const Pipeline = () => {
                 <button
                     onClick={() => {
                         setEditingDeal(null);
-                        setFormData({ title: '', value: '', client_id: '', agent_id: '' });
+                        setFormData({ title: '', value: '', client_id: '', lead_id: '', agent_id: '' });
                         setIsModalOpen(true);
                     }}
                     className="premium-button shadow-[0_0_20px_rgba(6,182,212,0.2)] w-full lg:w-auto justify-center"
@@ -199,7 +232,7 @@ export const Pipeline = () => {
                                 title={stage.title}
                                 color={stage.color}
                                 deals={deals.filter(deal => deal.stage === stage.id)}
-                                getClientName={getClientName}
+                                getEntityName={getEntityName}
                                 onDealClick={handleDealClick}
                             />
                         ))}
@@ -209,7 +242,7 @@ export const Pipeline = () => {
                 <DragOverlay>
                     {activeDeal ? (
                         <div className="transform rotate-2 opacity-90 cursor-grabbing w-[300px] shadow-2xl">
-                            <KanbanCard deal={activeDeal} clientName={getClientName(activeDeal.client_id)} />
+                            <KanbanCard deal={activeDeal} clientName={getEntityName(activeDeal)} />
                         </div>
                     ) : null}
                 </DragOverlay>
@@ -234,50 +267,68 @@ export const Pipeline = () => {
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Título do Negócio</label>
-                                <input
-                                    type="text"
+                                <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Empreendimento (Título)</label>
+                                <select
                                     required
-                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:border-cyan-500/50 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-700 font-bold"
+                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:border-cyan-500/50 outline-none transition-all appearance-none cursor-pointer font-bold"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="Ex: Venda Apartamento Centro"
-                                />
+                                >
+                                    <option value="" className="text-slate-500">Selecione o empreendimento...</option>
+                                    {projects.map(project => (
+                                        <option key={project.id} value={project.name} className="text-slate-800 dark:bg-[#0f0f12] dark:text-white">
+                                            {project.name}
+                                        </option>
+                                    ))}
+                                    {/* Fallback for cases where project is not in list or generic name is preferred */}
+                                    {formData.title && !projects.some(p => p.name === formData.title) && (
+                                        <option value={formData.title}>{formData.title}</option>
+                                    )}
+                                </select>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Valor (R$)</label>
+                                    <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Estimado</label>
                                     <input
-                                        type="number"
+                                        type="text"
                                         required
                                         className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:border-cyan-500/50 outline-none transition-all font-bold"
-                                        value={formData.value}
-                                        onChange={e => setFormData({ ...formData, value: e.target.value })}
-                                        placeholder="0,00"
+                                        value={formatCurrency(formData.value)}
+                                        onChange={handleValueChange}
+                                        placeholder="R$ 0,00"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Status</label>
-                                    <div className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 text-sm italic font-bold">
-                                        {editingDeal ? editingDeal.stage.toUpperCase() : 'LEAD'}
+                                    <div className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 text-sm italic font-bold uppercase tracking-tighter">
+                                        {editingDeal ? editingDeal.stage.replace('_', ' ') : 'LEAD'}
                                     </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Cliente Relacionado</label>
-                                <select
-                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:border-cyan-500/50 outline-none transition-all appearance-none cursor-pointer font-bold"
-                                    value={formData.client_id}
-                                    onChange={e => setFormData({ ...formData, client_id: e.target.value })}
-                                >
-                                    <option value="" className="text-slate-500">Selecione um cliente...</option>
-                                    {clients.map(client => (
-                                        <option key={client.id} value={client.id} className="text-slate-800 dark:bg-[#0f0f12] dark:text-white">{client.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            {(!editingDeal || !editingDeal.client_id) ? (
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Lead Relacionado</label>
+                                    <select
+                                        className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:border-cyan-500/50 outline-none transition-all appearance-none cursor-pointer font-bold"
+                                        value={formData.lead_id}
+                                        onChange={e => setFormData({ ...formData, lead_id: e.target.value })}
+                                    >
+                                        <option value="" className="text-slate-500">Selecione um lead...</option>
+                                        {leads.map(lead => (
+                                            <option key={lead.id} value={lead.id} className="text-slate-800 dark:bg-[#0f0f12] dark:text-white">{lead.nome}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Cliente (Convertido)</label>
+                                    <div className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-800 dark:text-white text-sm font-bold italic">
+                                        {clients.find(c => c.id === formData.client_id)?.name || 'Cliente Desconhecido'}
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest mb-2">Responsável (Corretor)</label>

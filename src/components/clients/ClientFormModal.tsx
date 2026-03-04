@@ -1,5 +1,5 @@
 import React from 'react';
-import { Client } from '../../types';
+import { Client, Lead } from '../../types';
 import { User as UserIcon, Mail, Phone, FileText, MapPin, Save, Heart } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
@@ -13,6 +13,7 @@ interface ClientFormModalProps {
     onSubmit: (e: React.FormEvent) => void;
     editingId: string | null;
     togglePreference: (field: 'propertyType' | 'neighborhoods', value: string) => void;
+    leads?: Lead[];
 }
 
 export const ClientFormModal: React.FC<ClientFormModalProps> = ({
@@ -22,8 +23,28 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
     setFormData,
     onSubmit,
     editingId,
-    togglePreference
+    togglePreference,
+    leads = [] as Lead[]
 }) => {
+    const formatCEP = (value: string) => {
+        if (!value) return '';
+        const numbers = value.replace(/\D/g, '');
+        return numbers.replace(/^(\d{5})(\d)/, '$1-$2').substring(0, 9);
+    };
+
+    const formatCurrency = (value: string | number | undefined) => {
+        if (value === undefined || value === null || value === 0 || value === '') return '';
+        const digitsStr = typeof value === 'number' ? (value * 100).toFixed(0) : String(value).replace(/\D/g, '');
+        if (!digitsStr) return '';
+        const amount = Number(digitsStr) / 100;
+        return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
+
+    const parseCurrency = (value: string) => {
+        const digitsStr = value.replace(/\D/g, '');
+        return digitsStr ? Number(digitsStr) / 100 : 0;
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -39,6 +60,33 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
+                            {leads.length > 0 && !editingId && (
+                                <div className="mb-6 bg-primary/5 border border-primary/20 rounded-2xl p-5 shadow-lg shadow-primary/5 animate-in slide-in-from-top-4">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-3 flex items-center gap-2 italic">
+                                        <UserIcon size={14} /> Importar Lead para Conversão
+                                    </h4>
+                                    <Input
+                                        as="select"
+                                        label="Selecionar Lead Existente"
+                                        onChange={(e) => {
+                                            const lead = leads.find(l => l.id === e.target.value);
+                                            if (lead) {
+                                                setFormData({
+                                                    ...formData,
+                                                    name: lead.nome || formData.name,
+                                                    phone: lead.telefone || formData.phone,
+                                                    email: lead.email || formData.email
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <option value="">Nenhum - Criar cliente manualmente</option>
+                                        {leads.filter(l => l.status !== 'fechado' && l.status !== 'perdido').map(l => (
+                                            <option key={l.id} value={l.id}>{l.nome} {l.telefone ? `- ${l.telefone}` : ''}</option>
+                                        ))}
+                                    </Input>
+                                </div>
+                            )}
                             <Input
                                 label="Nome Completo"
                                 required
@@ -112,8 +160,8 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
                         <Input
                             label="CEP"
                             icon={<MapPin size={18} />}
-                            value={formData.zipCode}
-                            onChange={e => setFormData({ ...formData, zipCode: e.target.value })}
+                            value={formData.zipCode || ''}
+                            onChange={e => setFormData({ ...formData, zipCode: formatCEP(e.target.value) })}
                             placeholder="00000-000"
                         />
                         <div className="md:col-span-2">
@@ -149,6 +197,17 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
                             placeholder="SP"
                             className="uppercase"
                         />
+                        <div className="md:col-span-2">
+                            <Input
+                                as="textarea"
+                                label="Observações"
+                                icon={<FileText size={18} />}
+                                value={formData.notes || ''}
+                                onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                                placeholder="Anotações adicionais sobre o cliente..."
+                                rows={3}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -178,22 +237,24 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Input
-                                type="number"
+                                type="text"
                                 label="Budget Mínimo"
-                                value={formData.preferences?.minBudget}
+                                value={formatCurrency(formData.preferences?.minBudget)}
                                 onChange={e => setFormData({
                                     ...formData,
-                                    preferences: { ...formData.preferences!, minBudget: parseFloat(e.target.value) }
+                                    preferences: { ...formData.preferences!, minBudget: parseCurrency(e.target.value) }
                                 })}
+                                placeholder="R$ 0,00"
                             />
                             <Input
-                                type="number"
+                                type="text"
                                 label="Budget Máximo"
-                                value={formData.preferences?.maxBudget}
+                                value={formatCurrency(formData.preferences?.maxBudget)}
                                 onChange={e => setFormData({
                                     ...formData,
-                                    preferences: { ...formData.preferences!, maxBudget: parseFloat(e.target.value) }
+                                    preferences: { ...formData.preferences!, maxBudget: parseCurrency(e.target.value) }
                                 })}
+                                placeholder="R$ 0,00"
                             />
                         </div>
                     </div>
