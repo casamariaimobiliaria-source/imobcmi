@@ -17,16 +17,18 @@ export const projectService = {
 
         return data.map(item => ({
             ...item,
-            organizationId: item.organization_id // normalize case
+            organizationId: item.organization_id, // normalize case
+            developerId: item.developer_id
         })) as Project[];
     },
 
     addProject: async (project: Project): Promise<Project> => {
-        const { id, organizationId, ...rest } = project;
+        const { id, organizationId, developerId, ...rest } = project;
         // ensure db fields
         const insertData: any = {
             ...rest,
-            organization_id: organizationId
+            organization_id: organizationId,
+            developer_id: developerId
         };
 
         if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -50,13 +52,14 @@ export const projectService = {
             console.error('Error adding project:', error);
             throw error;
         }
-        return { ...data, organizationId: data.organization_id } as Project;
+        return { ...data, organizationId: data.organization_id, developerId: data.developer_id } as Project;
     },
 
     updateProject: async (id: string, project: Partial<Project>): Promise<void> => {
-        const { organizationId, ...rest } = project;
+        const { organizationId, developerId, ...rest } = project;
         const updateData: any = { ...rest };
-        if (organizationId) updateData.organization_id = organizationId;
+        if (organizationId !== undefined) updateData.organization_id = organizationId;
+        if (developerId !== undefined) updateData.developer_id = developerId;
 
         // Clean empty strings to null to avoid UUID cast errors
         Object.keys(updateData).forEach(key => {

@@ -15,20 +15,21 @@ export const Button: React.FC<ButtonProps> = ({
     className = '',
     ...props
 }) => {
-    const baseStyles = "px-4 py-2 rounded-xl transition-all duration-500 flex items-center justify-center gap-2 uppercase tracking-tighter text-[10px] italic font-black border backdrop-blur-md";
+    // Base styles: uppercase track, bold font, subtle glass
+    const baseStyles = "px-4 py-2 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] italic font-black border backdrop-blur-md shrink-0 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed";
 
     const variants = {
         primary: "premium-button shimmer",
-        secondary: "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white hover:border-white/20",
+        secondary: "bg-white/[0.04] border-white/10 text-[#00F5FF] hover:bg-[#00F5FF]/10 hover:border-[#00F5FF]/30 shadow-[0_4px_15px_rgba(0,0,0,0.2)]",
         danger: "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]",
-        ghost: "bg-transparent border-transparent text-slate-500 hover:text-cyan-400 hover:bg-white/5"
+        ghost: "bg-transparent border-transparent text-slate-500 hover:text-[#00F5FF] hover:bg-[#00F5FF]/5"
     };
 
     const selectedVariant = variants[variant] || variants.primary;
 
     return (
         <button
-            className={`${variant === 'primary' ? '' : baseStyles} ${selectedVariant} ${loading ? 'opacity-70 cursor-wait' : ''} ${className} active:scale-95 transition-transform`}
+            className={`${variant === 'primary' ? '' : baseStyles} ${selectedVariant} ${loading ? 'opacity-70 cursor-wait' : ''} ${className}`}
             disabled={loading}
             {...props}
         >

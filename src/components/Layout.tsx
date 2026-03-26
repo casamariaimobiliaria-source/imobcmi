@@ -81,8 +81,8 @@ export const Layout = ({ children }: LayoutProps) => {
   })).filter(group => group.items.length > 0);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden relative print:bg-white print:h-auto print:overflow-visible">
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none z-0 print:hidden"></div>
+    <div className="flex h-screen bg-[#050B18] overflow-hidden relative print:bg-white print:h-auto print:overflow-visible">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none z-0 print:hidden"></div>
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -93,15 +93,15 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 glass-thick text-foreground transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
-        ${sidebarOpen ? 'translate-x-0 outline outline-primary/20' : '-translate-x-full'}
-        md:relative md:translate-x-0 border-r border-white/10 dark:border-white/5 shadow-[20px_0_60px_rgba(0,0,0,0.1)]
+        fixed inset-y-0 left-0 z-50 bg-[#050B18]/90 backdrop-blur-2xl text-white transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
+        ${sidebarOpen ? 'translate-x-0 outline outline-[#00F5FF]/20' : '-translate-x-full'}
+        md:relative md:translate-x-0 border-r border-[#00F5FF]/10 shadow-[20px_0_60px_rgba(0,0,0,0.5)]
         ${isCollapsed ? 'w-24' : 'w-72'}
         flex flex-col print:hidden
       `} aria-label="Navegação Principal">
         {/* Logo Section */}
         <div className={`flex items-center gap-3 p-8 mb-4 transition-all duration-500 overflow-hidden ${isCollapsed ? 'justify-center px-4' : 'px-8'}`}>
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 via-cyan-500 to-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all overflow-hidden border border-white/20 active:scale-95 shimmer" aria-hidden="true">
+          <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#00F5FF] via-[#00F5FF] to-[#7B2FFF] flex items-center justify-center shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all overflow-hidden border border-white/20 active:scale-95 shimmer" aria-hidden="true">
             {settings?.logo_url ? (
               <img src={settings.logo_url} alt="" className="w-full h-full object-contain p-2" />
             ) : (
@@ -163,8 +163,8 @@ export const Layout = ({ children }: LayoutProps) => {
                         flex items-center rounded-2xl transition-all duration-500 group relative overflow-hidden h-14
                         ${isCollapsed ? 'justify-center px-0 w-14 mx-auto' : 'px-5 gap-5 w-full'}
                         ${isActive
-                          ? 'bg-gradient-to-r from-primary/20 via-primary/5 to-transparent text-primary shadow-[0_0_30px_rgba(6,182,212,0.15)] ring-1 ring-white/10'
-                          : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}
+                          ? 'bg-gradient-to-r from-[#00F5FF]/20 to-[#7B2FFF]/10 text-[#00F5FF] shadow-[0_0_30px_rgba(0,245,255,0.15)] ring-1 ring-[#00F5FF]/20'
+                          : 'text-muted-foreground hover:bg-white/5 hover:text-white'}
                       `}
                       aria-current={({ isActive }: { isActive: boolean }) => isActive ? 'page' : undefined}
                     >
@@ -178,7 +178,7 @@ export const Layout = ({ children }: LayoutProps) => {
                           )}
 
                           {/* Active Indicator Bar */}
-                          <div className={`absolute left-0 w-1 rounded-r-full transition-all duration-700 ${isActive ? 'h-8 bg-primary animate-in slide-in-from-left-2' : 'h-0 bg-transparent'}`} />
+                          <div className={`absolute left-0 w-1 rounded-r-full transition-all duration-700 ${isActive ? 'h-8 bg-gradient-to-b from-[#00F5FF] to-[#7B2FFF] animate-in slide-in-from-left-2 shadow-[0_0_10px_#00F5FF]' : 'h-0 bg-transparent'}`} />
 
                           {/* Tooltip for Collapsed State */}
                           {isCollapsed && (
@@ -209,8 +209,11 @@ export const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-700 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent print:bg-transparent print:p-0">
-        <header className="h-24 flex items-center justify-between px-6 md:px-12 relative z-30 w-full backdrop-blur-sm print:hidden">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-700 bg-transparent print:bg-transparent print:p-0 relative">
+        {/* Web3 Orb Background Desktop */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-[#00F5FF]/5 via-[#7B2FFF]/5 to-transparent blur-[100px] rounded-full pointer-events-none -mr-40 -mt-40"></div>
+
+        <header className="h-24 flex items-center justify-between px-6 md:px-12 relative z-30 w-full bg-[#050B18]/60 backdrop-blur-xl border-b border-[#00F5FF]/10 print:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden p-3 text-foreground bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all active:scale-95"
@@ -312,13 +315,13 @@ export const Layout = ({ children }: LayoutProps) => {
                   </p>
                 </div>
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-primary font-black italic border border-white/10 shadow-2xl group-hover:border-primary/50 group-hover:shadow-primary/10 transition-all duration-500 overflow-hidden relative">
+              <div className="w-14 h-14 rounded-2xl bg-[#0A1025] flex items-center justify-center text-[#00F5FF] font-black italic border border-[#00F5FF]/20 shadow-2xl group-hover:border-[#7B2FFF]/50 group-hover:shadow-[0_0_20px_rgba(123,47,255,0.3)] transition-all duration-500 overflow-hidden relative">
                 {user?.avatar_url ? (
                   <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
                   <span className="text-xl relative z-10 transition-transform duration-500 group-hover:scale-125">{user?.name.charAt(0)}</span>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#00F5FF]/20 via-transparent to-[#7B2FFF]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             </div>
           </div>

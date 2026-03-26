@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SwapDEX – Exchange Descentralizada</title>
+  <meta name="description" content="A exchange descentralizada mais rápida da Web3. Troque tokens, forneça liquidez e participe da governança com total soberania financeira." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="url(#lg1)" stroke-width="2"/>
+          <path d="M10 20L16 8L22 20" stroke="url(#lg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11.5 17H20.5" stroke="url(#lg2)" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="lg1" x1="1" y1="1" x2="31" y2="31" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00F5FF"/><stop offset="1" stop-color="#7B2FFF"/>
+            </linearGradient>
+            <linearGradient id="lg2" x1="10" y1="8" x2="22" y2="20" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00F5FF"/><stop offset="1" stop-color="#7B2FFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Swap<span class="logo-accent">DEX</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#tokens">Tokens</a></li>
+        <li><a href="#liquidez">Liquidez</a></li>
+        <li><a href="#governanca">Governança</a></li>
+        <li><a href="#stats">Estatísticas</a></li>
+      </ul>
+      <button class="btn-connect" id="connectBtn">
+        <span class="btn-dot"></span>
+        Conectar Carteira
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-mobile" id="navMobile">
+      <a href="#tokens">Tokens</a>
+      <a href="#liquidez">Liquidez</a>
+      <a href="#governanca">Governança</a>
+      <a href="#stats">Estatísticas</a>
+      <button class="btn-connect full-width">Conectar Carteira</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          Protocolo ao vivo na Mainnet
+        </div>
+        <h1 class="hero-title">
+          A Exchange<br/>
+          <span class="gradient-text">Descentralizada</span><br/>
+          do Futuro
+        </h1>
+        <p class="hero-desc">
+          Troque qualquer token, forneça liquidez e governe o protocolo. 
+          Sem custódia. Sem permissões. Total soberania financeira.
+        </p>
+        <div class="hero-cta">
+          <a href="#swap" class="btn-primary">Começar a Trocar</a>
+          <a href="#liquidez" class="btn-ghost">Fornecer Liquidez</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value">$4.2B</span>
+            <span class="stat-label">Volume Total</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">180K+</span>
+            <span class="stat-label">Usuários Ativos</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">0.05%</span>
+            <span class="stat-label">Taxa Mínima</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SWAP CARD -->
+      <div class="swap-card" id="swap">
+        <div class="swap-header">
+          <span class="swap-title">Trocar</span>
+          <div class="swap-controls">
+            <button class="swap-ctrl" title="Configurações">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="swap-body">
+          <div class="token-input">
+            <div class="token-row">
+              <div class="token-select" id="tokenFromSelect">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=035" width="24" height="24" alt="ETH" onerror="this.style.display='none'"/>
+                <span>ETH</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <input type="number" class="token-amount" placeholder="0.0" id="fromAmount"/>
+            </div>
+            <div class="token-balance">
+              <span>Saldo: <strong>2.4581 ETH</strong></span>
+              <button class="max-btn">MAX</button>
+            </div>
+          </div>
+
+          <button class="swap-arrow" id="swapArrowBtn" title="Inverter tokens">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+            </svg>
+          </button>
+
+          <div class="token-input">
+            <div class="token-row">
+              <div class="token-select" id="tokenToSelect">
+                <div class="token-icon usdc">$</div>
+                <span>USDC</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <input type="number" class="token-amount" placeholder="0.0" id="toAmount" readonly/>
+            </div>
+            <div class="token-balance">
+              <span>Saldo: <strong>1,245.00 USDC</strong></span>
+            </div>
+          </div>
+
+          <div class="swap-info">
+            <div class="info-row">
+              <span>Taxa estimada</span>
+              <span class="info-val">~$1.24 (0.05%)</span>
+            </div>
+            <div class="info-row">
+              <span>Impacto de preço</span>
+              <span class="info-val positive">&lt; 0.01%</span>
+            </div>
+            <div class="info-row">
+              <span>Rota</span>
+              <span class="info-val">ETH → USDC</span>
+            </div>
+          </div>
+
+          <button class="btn-swap-action" id="swapActionBtn">
+            Conectar Carteira para Trocar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKENS SUPORTADOS -->
+  <section class="section tokens-section" id="tokens">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Ativos Suportados</div>
+        <h2 class="section-title">Mais de <span class="gradient-text">200 Tokens</span> Disponíveis</h2>
+        <p class="section-desc">Acesse os principais ativos digitais com liquidez profunda e execução imediata.</p>
+      </div>
+      <div class="tokens-grid">
+        <div class="token-card">
+          <div class="tc-icon eth-ico">
+            <svg viewBox="0 0 32 32" width="36" height="36"><path fill="#627EEA" d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16z"/><path fill="#fff" fill-opacity=".6" d="M16.498 4v8.87l7.497 3.35z"/><path fill="#fff" d="M16.498 4L9 16.22l7.498-3.35z"/><path fill="#fff" fill-opacity=".6" d="M16.498 21.968v6.027L24 17.616z"/><path fill="#fff" d="M16.498 27.995v-6.028L9 17.616z"/><path fill="#fff" fill-opacity=".2" d="M16.498 20.573l7.497-4.353-7.497-3.348z"/><path fill="#fff" fill-opacity=".6" d="M9 16.22l7.498 4.353v-7.701z"/></svg>
+          </div>
+          <div class="tc-info">
+            <div class="tc-name">Ethereum</div>
+            <div class="tc-symbol">ETH</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$3,241.80</div>
+            <div class="tc-change positive">+2.4%</div>
+          </div>
+        </div>
+        <div class="token-card">
+          <div class="tc-icon btc-ico">₿</div>
+          <div class="tc-info">
+            <div class="tc-name">Bitcoin Wrapper</div>
+            <div class="tc-symbol">WBTC</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$62,145.00</div>
+            <div class="tc-change positive">+1.8%</div>
+          </div>
+        </div>
+        <div class="token-card">
+          <div class="tc-icon usdc-ico">$</div>
+          <div class="tc-info">
+            <div class="tc-name">USD Coin</div>
+            <div class="tc-symbol">USDC</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$1.00</div>
+            <div class="tc-change neutral">0.00%</div>
+          </div>
+        </div>
+        <div class="token-card">
+          <div class="tc-icon matic-ico">⬡</div>
+          <div class="tc-info">
+            <div class="tc-name">Polygon</div>
+            <div class="tc-symbol">MATIC</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$0.891</div>
+            <div class="tc-change negative">-0.7%</div>
+          </div>
+        </div>
+        <div class="token-card">
+          <div class="tc-icon link-ico">⬡</div>
+          <div class="tc-info">
+            <div class="tc-name">Chainlink</div>
+            <div class="tc-symbol">LINK</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$14.32</div>
+            <div class="tc-change positive">+5.1%</div>
+          </div>
+        </div>
+        <div class="token-card featured">
+          <div class="tc-icon sdex-ico">◈</div>
+          <div class="tc-info">
+            <div class="tc-name">SwapDEX Token</div>
+            <div class="tc-symbol">SDEX</div>
+          </div>
+          <div class="tc-stats">
+            <div class="tc-price">$8.74</div>
+            <div class="tc-change positive">+12.3%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIQUIDEZ -->
+  <section class="section liquidity-section" id="liquidez">
+    <div class="container">
+      <div class="liq-grid">
+        <div class="liq-left">
+          <div class="section-badge">Provedores de Liquidez</div>
+          <h2 class="section-title">Ganhe <span class="gradient-text">Recompensas</span><br/>Fornecendo Liquidez</h2>
+          <p class="section-desc">Deposite seus ativos nos pools e receba uma parte das taxas de cada swap. Quanto mais você fornece, mais você ganha.</p>
+          <div class="liq-benefits">
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <div class="benefit-title">Taxas Automáticas</div>
+                <div class="benefit-desc">Ganhe 0.25% de cada swap proporcional à sua participação no pool.</div>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <div>
+                <div class="benefit-title">APR de até 45%</div>
+                <div class="benefit-desc">Pools incentivados com recompensas SDEX adicionais além das taxas base.</div>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </div>
+              <div>
+                <div class="benefit-title">Sem Lock-up</div>
+                <div class="benefit-desc">Remova sua liquidez a qualquer momento, sem períodos de bloqueio obrigatórios.</div>
+              </div>
+            </div>
+          </div>
+          <a href="#" class="btn-primary">Adicionar Liquidez</a>
+        </div>
+        <div class="liq-right">
+          <div class="pools-card">
+            <div class="pools-header">
+              <span>Melhores Pools</span>
+              <span class="pools-all">Ver todos →</span>
+            </div>
+            <div class="pool-item">
+              <div class="pool-pair">
+                <div class="pool-icons">
+                  <div class="pi eth">Ξ</div>
+                  <div class="pi usd">$</div>
+                </div>
+                <div>
+                  <div class="pool-name">ETH / USDC</div>
+                  <div class="pool-fee">0.05% taxa</div>
+                </div>
+              </div>
+              <div class="pool-data">
+                <div class="pool-tvl">$124M TVL</div>
+                <div class="pool-apr apr-high">38.4% APR</div>
+              </div>
+            </div>
+            <div class="pool-item">
+              <div class="pool-pair">
+                <div class="pool-icons">
+                  <div class="pi btc">₿</div>
+                  <div class="pi eth">Ξ</div>
+                </div>
+                <div>
+                  <div class="pool-name">WBTC / ETH</div>
+                  <div class="pool-fee">0.30% taxa</div>
+                </div>
+              </div>
+              <div class="pool-data">
+                <div class="pool-tvl">$89M TVL</div>
+                <div class="pool-apr apr-med">24.1% APR</div>
+              </div>
+            </div>
+            <div class="pool-item">
+              <div class="pool-pair">
+                <div class="pool-icons">
+                  <div class="pi sdex">◈</div>
+                  <div class="pi eth">Ξ</div>
+                </div>
+                <div>
+                  <div class="pool-name">SDEX / ETH</div>
+                  <div class="pool-fee">0.30% taxa</div>
+                </div>
+              </div>
+              <div class="pool-data">
+                <div class="pool-tvl">$41M TVL</div>
+                <div class="pool-apr apr-high">45.2% APR</div>
+              </div>
+            </div>
+            <div class="pool-item">
+              <div class="pool-pair">
+                <div class="pool-icons">
+                  <div class="pi mat">⬡</div>
+                  <div class="pi usd">$</div>
+                </div>
+                <div>
+                  <div class="pool-name">MATIC / USDC</div>
+                  <div class="pool-fee">0.05% taxa</div>
+                </div>
+              </div>
+              <div class="pool-data">
+                <div class="pool-tvl">$18M TVL</div>
+                <div class="pool-apr apr-med">19.8% APR</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOVERNANÇA -->
+  <section class="section governance-section" id="governanca">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Governança On-Chain</div>
+        <h2 class="section-title">Você <span class="gradient-text">Decide</span> o Futuro do Protocolo</h2>
+        <p class="section-desc">Detentores de SDEX votam em propostas que afetam taxas, pools incentivados, integrações e o futuro da plataforma.</p>
+      </div>
+      <div class="gov-grid">
+        <div class="gov-card">
+          <div class="gov-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3>Voto Democrático</h3>
+          <p>1 SDEX = 1 voto. Qualquer detentor pode propor e votar em mudanças no protocolo sem intermediários.</p>
+        </div>
+        <div class="gov-card">
+          <div class="gov-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Tesouro Coletivo</h3>
+          <p>O tesouro do protocolo, com mais de $12M, é controlado pelos detentores de SDEX via votação on-chain.</p>
+        </div>
+        <div class="gov-card">
+          <div class="gov-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Timelock de Segurança</h3>
+          <p>Todas as mudanças têm um período de 48h antes de serem executadas, garantindo transparência e tempo para reação.</p>
+        </div>
+        <div class="gov-card">
+          <div class="gov-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>Delegação de Voto</h3>
+          <p>Delegue seus tokens de governança para representantes confiáveis se não quiser participar de cada votação.</p>
+        </div>
+      </div>
+
+      <div class="active-proposals">
+        <h3 class="proposals-title">Propostas Ativas</h3>
+        <div class="proposal-card">
+          <div class="proposal-meta">
+            <span class="proposal-id">SIP-041</span>
+            <span class="proposal-status active">Votação Aberta</span>
+            <span class="proposal-time">2 dias restantes</span>
+          </div>
+          <div class="proposal-title-text">Reduzir taxa do pool ETH/USDC de 0.30% para 0.05% para aumentar volume</div>
+          <div class="proposal-votes">
+            <div class="vote-bar">
+              <div class="vote-yes" style="width: 68%"></div>
+            </div>
+            <div class="vote-labels">
+              <span class="yes">✓ Sim: 68%</span>
+              <span class="no">✗ Não: 32%</span>
+            </div>
+          </div>
+        </div>
+        <div class="proposal-card">
+          <div class="proposal-meta">
+            <span class="proposal-id">SIP-040</span>
+            <span class="proposal-status pending">Em Discussão</span>
+            <span class="proposal-time">Inicia em 1 dia</span>
+          </div>
+          <div class="proposal-title-text">Adicionar pool SDEX/ARB com incentivos de 500K SDEX por mês</div>
+          <div class="proposal-votes">
+            <div class="vote-bar">
+              <div class="vote-yes" style="width: 82%"></div>
+            </div>
+            <div class="vote-labels">
+              <span class="yes">✓ Sim: 82%</span>
+              <span class="no">✗ Não: 18%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section stats-section" id="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div class="stat-number" data-target="4200000000">$4.2B</div>
+          <div class="stat-label-big">Volume Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          </div>
+          <div class="stat-number">$272M</div>
+          <div class="stat-label-big">Liquidez Total (TVL)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="stat-number">180K+</div>
+          <div class="stat-label-big">Usuários Únicos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-number">2.1M+</div>
+          <div class="stat-label-big">Total de Transações</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WALLET INTEGRATION -->
+  <section class="section wallets-section" id="carteiras">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Integração de Carteiras</div>
+        <h2 class="section-title">Conecte sua <span class="gradient-text">Carteira Favorita</span></h2>
+        <p class="section-desc">Compatível com as principais carteiras Web3. Sua chave, sua custódia.</p>
+      </div>
+      <div class="wallets-grid">
+        <div class="wallet-card">
+          <div class="wallet-icon metamask">🦊</div>
+          <div class="wallet-name">MetaMask</div>
+          <div class="wallet-type">Extensão de Navegador</div>
+        </div>
+        <div class="wallet-card">
+          <div class="wallet-icon walletconnect">🔗</div>
+          <div class="wallet-name">WalletConnect</div>
+          <div class="wallet-type">Protocolo Universal</div>
+        </div>
+        <div class="wallet-card">
+          <div class="wallet-icon coinbase">🔵</div>
+          <div class="wallet-name">Coinbase Wallet</div>
+          <div class="wallet-type">Mobile &amp; Extensão</div>
+        </div>
+        <div class="wallet-card">
+          <div class="wallet-icon trustwallet">🛡️</div>
+          <div class="wallet-name">Trust Wallet</div>
+          <div class="wallet-type">Mobile</div>
+        </div>
+        <div class="wallet-card">
+          <div class="wallet-icon ledger">🔒</div>
+          <div class="wallet-name">Ledger</div>
+          <div class="wallet-type">Hardware Wallet</div>
+        </div>
+        <div class="wallet-card">
+          <div class="wallet-icon rabby">🐰</div>
+          <div class="wallet-name">Rabby Wallet</div>
+          <div class="wallet-type">Extensão de Navegador</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <div class="cta-orb cta-orb1"></div>
+        <div class="cta-orb cta-orb2"></div>
+        <h2>Pronto para começar?</h2>
+        <p>Conecte sua carteira agora e entre no futuro das finanças descentralizadas.</p>
+        <div class="cta-actions">
+          <button class="btn-primary large">Conectar Carteira</button>
+          <a href="#" class="btn-ghost">Ler Documentação →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="nav-logo" style="font-size:1.3rem;">Swap<span class="logo-accent">DEX</span></span>
+          <p>O protocolo de troca descentralizada mais eficiente da Web3. Código aberto, sem custódia.</p>
+          <div class="social-links">
+            <a href="#" class="social-link" aria-label="Twitter/X">𝕏</a>
+            <a href="#" class="social-link" aria-label="Discord">💬</a>
+            <a href="#" class="social-link" aria-label="GitHub">⌨</a>
+            <a href="#" class="social-link" aria-label="Telegram">✈</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Produto</h4>
+            <a href="#">Swap</a>
+            <a href="#">Pools de Liquidez</a>
+            <a href="#">Farmagem</a>
+            <a href="#">Analytics</a>
+          </div>
+          <div class="footer-col">
+            <h4>Governança</h4>
+            <a href="#">Propostas</a>
+            <a href="#">Votar</a>
+            <a href="#">Fórum</a>
+            <a href="#">Tesouro</a>
+          </div>
+          <div class="footer-col">
+            <h4>Recursos</h4>
+            <a href="#">Documentação</a>
+            <a href="#">Whitepaper</a>
+            <a href="#">Blog</a>
+            <a href="#">Auditorias</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 SwapDEX Protocol. Código aberto sob licença MIT.</span>
+        <span>Contratos auditados por <strong>CertiK</strong> &amp; <strong>Trail of Bits</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

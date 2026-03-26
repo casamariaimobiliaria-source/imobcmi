@@ -9,7 +9,8 @@ export default {
         extend: {
             colors: {
                 crm: {
-                    cyan: '#06b6d4',
+                    cyan: '#00F5FF',
+                    violet: '#7B2FFF',
                     blue: '#3b82f6',
                 },
                 border: "hsl(var(--border))",
@@ -52,7 +53,7 @@ export default {
                 sm: "calc(var(--radius) - 4px)",
             },
             fontFamily: {
-                sans: ["Outfit", "sans-serif"],
+                sans: ["'Space Grotesk'", "Inter", "sans-serif"],
             },
         },
     },

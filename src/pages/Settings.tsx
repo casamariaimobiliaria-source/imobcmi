@@ -378,7 +378,7 @@ export const Settings = () => {
                                                         }
                                                         setIsEditingBank(false);
                                                     } catch (e: any) {
-                                                        toast.error('Erro ao salvar conta: ' + e.message);
+                                                        toast.error('Erro ao salvar configuração da conta bancária.');
                                                     }
                                                 }}
                                                 className="premium-button shadow-lg shadow-primary/20"
@@ -476,7 +476,8 @@ export const Settings = () => {
                                                             }
                                                             setIsEditingMethod(false);
                                                         } catch (e: any) {
-                                                            toast.error('Erro: ' + e.message);
+                                                            console.error('Erro Settings:', e);
+                                                            toast.error('Erro ao salvar método de pagamento.');
                                                         }
                                                     }}
                                                     className="premium-button shadow-lg shadow-primary/20"

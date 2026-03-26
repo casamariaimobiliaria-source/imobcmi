@@ -181,7 +181,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase.from('users').insert([{ name: u.name, email: u.email, role: u.role, phone: u.phone, organization_id: user?.organizationId }]).select().single();
     if (error) {
       console.error('Erro ao adicionar usuário:', error);
-      toast.error('Erro ao adicionar usuário: ' + error.message);
+      toast.error('Erro ao adicionar usuário. Tente novamente mais tarde.');
       return;
     }
     if (data) {
@@ -194,7 +194,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: updatedData, error } = await supabase.from('users').update(data).eq('id', id).select();
     if (error) {
       console.error('Erro ao atualizar usuário:', error);
-      toast.error('Erro ao atualizar usuário: ' + error.message);
+      toast.error('Erro ao atualizar usuário. Tente novamente mais tarde.');
       throw error;
     }
     if (!updatedData || updatedData.length === 0) {
@@ -216,7 +216,7 @@ const AppDataOrchestrator: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.from('users').delete().eq('id', id);
     if (error) {
       console.error('Erro ao excluir usuário:', error);
-      toast.error('Erro ao excluir usuário: ' + error.message);
+      toast.error('Erro ao excluir usuário. Verifique dependências e tente novamente.');
       return;
     }
     setUsersList(p => p.filter(u => u.id !== id));

@@ -11,14 +11,14 @@ export const useProjectManager = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const initialFormState: Partial<Project> = {
-        name: '', developer_id: '', status: 'active',
+        name: '', developerId: '', status: 'active',
         address: '', notes: ''
     };
 
     const [formData, setFormData] = useState<Partial<Project>>(initialFormState);
 
     const filteredProjects = projects.filter(p => {
-        const dev = developers.find(d => d.id === p.developer_id);
+        const dev = developers.find(d => d.id === p.developerId);
         const devName = dev ? dev.companyName.toLowerCase() : '';
         return p.name.toLowerCase().includes(searchTerm.toLowerCase()) || devName.includes(searchTerm.toLowerCase());
     });
